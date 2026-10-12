@@ -37,16 +37,26 @@ const app = express();
 // CORS
 // ==========================================
 
+
 const allowedOrigins = [
   "http://localhost:5173",
+  "https://mehaagarments.vercel.app",
 ];
 
-app.use(
-  cors({
-    origin: allowedOrigins,
-    credentials: true,
-  }),
-);
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests without an Origin header, such as server-to-server requests.
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+
 
 // ==========================================
 // HTTP SERVER
