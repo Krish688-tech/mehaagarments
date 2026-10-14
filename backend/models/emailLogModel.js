@@ -5,17 +5,20 @@ const emailLogSchema = new mongoose.Schema(
     order: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Order",
-      required: true,
+      default: null,
+      index: true,
+    },
+
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
       index: true,
     },
 
     type: {
       type: String,
-      enum: [
-        "ORDER_CONFIRMATION",
-        "ORDER_DELIVERED",
-        "NEW_ORDER_ADMIN",
-      ],
+      enum: ["ORDER_CONFIRMATION", "ORDER_DELIVERED", "NEW_ORDER_ADMIN", "PASSWORD_RESET"],
       required: true,
     },
 
@@ -75,20 +78,23 @@ const emailLogSchema = new mongoose.Schema(
 // ==========================================
 
 emailLogSchema.index(
-  {
-    order: 1,
-    type: 1,
-    recipient: 1,
-  },
+  { order: 1, type: 1, recipient: 1 },
   {
     unique: true,
     name: "unique_order_email",
+    partialFilterExpression: { order: { $type: "objectId" } },
   },
 );
 
-const EmailLog = mongoose.model(
-  "EmailLog",
-  emailLogSchema,
+emailLogSchema.index(
+  { user: 1, type: 1, recipient: 1 },
+  {
+    unique: true,
+    name: "unique_user_email",
+    partialFilterExpression: { user: { $type: "objectId" } },
+  },
 );
+
+const EmailLog = mongoose.model("EmailLog", emailLogSchema);
 
 export default EmailLog;

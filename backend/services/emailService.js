@@ -20,22 +20,32 @@ const getAdminEmail = () => {
 // GENERIC SEND EMAIL — RESEND API
 // ==========================================
 
+
 export const sendEmail = async ({
   to,
   subject,
   html,
   text = "",
   orderId = null,
+  userId = null,
   emailType = null,
 }) => {
   if (!to) {
     throw new Error("Email recipient is required");
   }
 
-  if (!orderId || !emailType) {
-    throw new Error(
-      "orderId and emailType are required for transactional emails",
-    );
+  if (!emailType || (!orderId && !userId) || (orderId && userId)) {
+    throw new Error("Provide an emailType and exactly one of orderId or userId");
+  }
+
+  const isPasswordReset = emailType === "PASSWORD_RESET";
+
+  if (isPasswordReset && !userId) {
+    throw new Error("Password reset emails require a userId");
+  }
+
+  if (!isPasswordReset && !orderId) {
+    throw new Error("Order emails require an orderId");
   }
 
   const apiKey = process.env.RESEND_API_KEY;
@@ -44,107 +54,58 @@ export const sendEmail = async ({
     throw new Error("RESEND_API_KEY is not configured");
   }
 
-  const normalizedRecipient = String(to).trim().toLowerCase();
+  const recipient = String(to).trim().toLowerCase();
+
+  const logFilter = orderId
+    ? { order: orderId, type: emailType, recipient }
+    : { user: userId, type: emailType, recipient };
 
   let emailLog = null;
 
   try {
-    // ==========================================
-    // CHECK EXISTING EMAIL
-    // ==========================================
-
-    emailLog = await EmailLog.findOne({
-      order: orderId,
-      type: emailType,
-      recipient: normalizedRecipient,
-    });
+    emailLog = await EmailLog.findOne(logFilter);
 
     if (emailLog?.status === "sent") {
-      console.log(
-        `EMAIL SKIPPED: ${emailType} already sent for order ${orderId}`,
-      );
-
-      return {
-        skipped: true,
-        reason: "already_sent",
-        emailLog,
-      };
+      return { sent: true, skipped: true, reason: "already_sent" };
     }
-
-    // ==========================================
-    // CREATE EMAIL LOG IF NEEDED
-    // ==========================================
 
     if (!emailLog) {
       try {
         emailLog = await EmailLog.create({
-          order: orderId,
+          ...(orderId ? { order: orderId } : { user: userId }),
           type: emailType,
-          recipient: normalizedRecipient,
+          recipient,
           subject,
           status: "pending",
           attempts: 0,
         });
       } catch (error) {
-        if (error?.code !== 11000) {
-          throw error;
-        }
+        if (error?.code !== 11000) throw error;
 
-        emailLog = await EmailLog.findOne({
-          order: orderId,
-          type: emailType,
-          recipient: normalizedRecipient,
-        });
+        emailLog = await EmailLog.findOne(logFilter);
 
-        if (!emailLog) {
-          throw error;
-        }
+        if (!emailLog) throw error;
 
         if (emailLog.status === "sent") {
-          console.log(
-            `EMAIL SKIPPED AFTER RACE: ${emailType} already sent for order ${orderId}`,
-          );
-
-          return {
-            skipped: true,
-            reason: "already_sent",
-            emailLog,
-          };
+          return { sent: true, skipped: true, reason: "already_sent" };
         }
       }
     }
 
-    // ==========================================
-    // PREVENT UNCONTROLLED RETRIES
-    // ==========================================
-
     if (emailLog.attempts >= 3) {
-      console.error(
-        `EMAIL BLOCKED: maximum attempts reached for ${emailType} / ${orderId}`,
-      );
-
       return {
+        sent: false,
         skipped: true,
         reason: "maximum_attempts_reached",
-        emailLog,
       };
     }
-
-    // ==========================================
-    // UPDATE ATTEMPT STATUS
-    // ==========================================
 
     emailLog.attempts += 1;
     emailLog.status = "pending";
     emailLog.subject = subject;
     emailLog.error = null;
     emailLog.failedAt = null;
-
     await emailLog.save();
-
-    // ==========================================
-    // SEND THROUGH RESEND API
-    // ==========================================
 
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -154,75 +115,51 @@ export const sendEmail = async ({
       },
       body: JSON.stringify({
         from: getFromAddress(),
-        to: [normalizedRecipient],
+        to: [recipient],
         subject,
         html,
-        text: text || undefined,
+        ...(text ? { text } : {}),
       }),
     });
 
     const result = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      const errorMessage =
+      throw new Error(
         result?.message ||
-        result?.error ||
-        `Resend API request failed with status ${response.status}`;
-
-      throw new Error(errorMessage);
+          result?.error ||
+          `Resend API request failed with status ${response.status}`,
+      );
     }
-
-    // ==========================================
-    // MARK EMAIL AS SENT
-    // ==========================================
 
     emailLog.status = "sent";
     emailLog.messageId = result.id || null;
     emailLog.sentAt = new Date();
     emailLog.error = null;
-    emailLog.failedAt = null;
-
     await emailLog.save();
 
-    console.log(
-      `EMAIL SENT: ${emailType} → ${normalizedRecipient}`,
-    );
+    console.log(`EMAIL SENT: ${emailType} → ${recipient}`);
 
     return {
-      skipped: false,
       sent: true,
       messageId: result.id || null,
       emailLog,
     };
   } catch (error) {
-    // ==========================================
-    // RECORD FAILURE
-    // ==========================================
-
-    if (emailLog) {
-      try {
-        emailLog.status = "failed";
-        emailLog.failedAt = new Date();
-        emailLog.error =
-          error?.message || "Unknown email sending error";
-
-        await emailLog.save();
-      } catch (logError) {
-        console.error(
-          "Could not update email failure log:",
-          logError?.message || logError,
-        );
-      }
+    if (emailLog && emailLog.status !== "sent") {
+      emailLog.status = "failed";
+      emailLog.failedAt = new Date();
+      emailLog.error = error?.message || "Unknown email sending error";
+      await emailLog.save().catch((logError) => {
+        console.error("Could not update email failure log:", logError.message);
+      });
     }
 
-    console.error(
-      `EMAIL FAILED: ${emailType} → ${normalizedRecipient}`,
-      error?.message || error,
-    );
-
+    console.error(`EMAIL FAILED: ${emailType} → ${recipient}`, error.message);
     throw error;
   }
 };
+
 
 // ==========================================
 // FORMAT CURRENCY

@@ -2,9 +2,9 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import { sendEmail } from "../services/emailService.js";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 
 // REGISTER
 export const registerUser = async (req, res) => {
@@ -71,7 +71,7 @@ export const registerUser = async (req, res) => {
       process.env.JWT_SECRET,
       {
         expiresIn: "7d",
-      }
+      },
     );
 
     res.status(201).json({
@@ -85,7 +85,6 @@ export const registerUser = async (req, res) => {
       },
       token,
     });
-
   } catch (error) {
     console.error("Register Error:", error);
 
@@ -94,7 +93,6 @@ export const registerUser = async (req, res) => {
     });
   }
 };
-
 
 // LOGIN
 export const loginUser = async (req, res) => {
@@ -134,10 +132,7 @@ export const loginUser = async (req, res) => {
     }
 
     // Compare password
-    const isMatch = await bcrypt.compare(
-      password,
-      user.password
-    );
+    const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(401).json({
@@ -154,7 +149,7 @@ export const loginUser = async (req, res) => {
       process.env.JWT_SECRET,
       {
         expiresIn: "7d",
-      }
+      },
     );
 
     res.status(200).json({
@@ -168,7 +163,6 @@ export const loginUser = async (req, res) => {
       },
       token,
     });
-
   } catch (error) {
     console.error("Login Error:", error);
 
@@ -224,9 +218,49 @@ export const forgotPassword = async (req, res) => {
 
     await user.save();
 
-    // Temporary development log
-    console.log("PASSWORD RESET TOKEN:", resetToken);
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
 
+    try {
+      const emailResult = await sendEmail({
+        to: user.email,
+        subject: "Reset Your Mehaa Garments Password",
+        html: `
+      <div style="font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 28px; color: #222;">
+        <h2 style="margin-bottom: 8px;">Mehaa Garments</h2>
+        <h3>Password Reset Request</h3>
+        <p>Hello ${user.name},</p>
+        <p>We received a request to reset your password. Click the button below to choose a new password.</p>
+        <p style="margin: 28px 0;">
+          <a href="${resetUrl}" style="background: #111; color: #fff; padding: 14px 22px; text-decoration: none; border-radius: 4px; display: inline-block;">
+            Reset Password
+          </a>
+        </p>
+        <p>This link expires in 15 minutes and can only be used once.</p>
+        <p>If you didn't request a password reset, you can safely ignore this email.</p>
+        <p style="color: #777; font-size: 13px;">Mehaa Garments Customer Support</p>
+      </div>
+    `,
+        text: `Hello ${user.name}, reset your Mehaa Garments password using this link: ${resetUrl}. This link expires in 15 minutes.`,
+        userId: user._id.toString(),
+        emailType: "PASSWORD_RESET",
+      });
+      if (!emailResult.sent) {
+        throw new Error("Password reset email was not sent");
+      }
+    } catch (emailError) {
+      user.resetPasswordToken = null;
+      user.resetPasswordExpire = null;
+      await user.save();
+
+      console.error("Password reset email failed:", emailError.message);
+
+      return res.status(500).json({
+        success: false,
+        message:
+          "Unable to send the password reset email. Please try again later.",
+      });
+    }
     res.status(200).json({
       success: true,
       message:
@@ -267,10 +301,7 @@ export const resetPassword = async (req, res) => {
     }
 
     // Hash the token received from the reset URL
-    const hashedToken = crypto
-      .createHash("sha256")
-      .update(token)
-      .digest("hex");
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
     // Find user with matching token that has not expired
     const user = await User.findOne({
