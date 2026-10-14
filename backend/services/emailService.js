@@ -1,15 +1,11 @@
 import EmailLog from "../models/emailLogModel.js";
 
-
- // ==========================================
+// ==========================================
 // RESEND EMAIL CONFIGURATION
 // ==========================================
 
 const getFromAddress = () => {
-  return (
-    process.env.EMAIL_FROM ||
-    "Mehaa Garments <support@mehaagarments.in>"
-  );
+  return process.env.EMAIL_FROM || "Mehaa Garments <support@mehaagarments.in>";
 };
 
 const getAdminEmail = () => {
@@ -19,7 +15,6 @@ const getAdminEmail = () => {
 // ==========================================
 // GENERIC SEND EMAIL — RESEND API
 // ==========================================
-
 
 export const sendEmail = async ({
   to,
@@ -35,7 +30,9 @@ export const sendEmail = async ({
   }
 
   if (!emailType || (!orderId && !userId) || (orderId && userId)) {
-    throw new Error("Provide an emailType and exactly one of orderId or userId");
+    throw new Error(
+      "Provide an emailType and exactly one of orderId or userId",
+    );
   }
 
   const isPasswordReset = emailType === "PASSWORD_RESET";
@@ -65,7 +62,7 @@ export const sendEmail = async ({
   try {
     emailLog = await EmailLog.findOne(logFilter);
 
-    if (emailLog?.status === "sent") {
+    if (emailLog?.status === "sent" && !isPasswordReset) {
       return { sent: true, skipped: true, reason: "already_sent" };
     }
 
@@ -90,6 +87,12 @@ export const sendEmail = async ({
           return { sent: true, skipped: true, reason: "already_sent" };
         }
       }
+    }
+
+    if (isPasswordReset && emailLog.status === "sent") {
+      emailLog.attempts = 0;
+      emailLog.messageId = null;
+      emailLog.sentAt = null;
     }
 
     if (emailLog.attempts >= 3) {
@@ -159,7 +162,6 @@ export const sendEmail = async ({
     throw error;
   }
 };
-
 
 // ==========================================
 // FORMAT CURRENCY
