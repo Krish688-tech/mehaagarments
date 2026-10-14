@@ -32,6 +32,59 @@ const Login = () => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
+  const handleForgotPassword = async () => {
+    const { value: email } = await Swal.fire({
+      title: "Forgot Password?",
+      text: "Enter your registered email address to receive a password reset link.",
+      input: "email",
+      inputPlaceholder: "Enter your email address",
+      showCancelButton: true,
+      confirmButtonText: "Send Reset Link",
+      confirmButtonColor: "#000000",
+      cancelButtonColor: "#6b7280",
+      inputValidator: (value) => {
+        if (!value?.trim()) {
+          return "Please enter your email address.";
+        }
+
+        if (!validateEmail(value.trim())) {
+          return "Please enter a valid email address.";
+        }
+      },
+    });
+
+    if (!email) return;
+
+    try {
+      Swal.fire({
+        title: "Sending reset link...",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => Swal.showLoading(),
+      });
+
+      await axios.post(`${API_URL}/auth/forgot-password`, {
+        email: email.trim().toLowerCase(),
+      });
+
+      await Swal.fire({
+        icon: "success",
+        title: "Check your email",
+        text: "If an account exists with that email, you will receive password reset instructions shortly.",
+        confirmButtonColor: "#000000",
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Unable to process request",
+        text:
+          error.response?.data?.message ||
+          "Something went wrong. Please try again later.",
+        confirmButtonColor: "#000000",
+      });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -156,6 +209,7 @@ const Login = () => {
         <div className="text-right">
           <button
             type="button"
+            onClick={handleForgotPassword}
             className="text-sm text-gray-500 hover:text-black transition"
           >
             Forgot Password?

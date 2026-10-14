@@ -4,6 +4,7 @@ import "./App.css";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ResetPassword from "./pages/ResetPassword";
 import ShopPage from "./pages/ShopPage";
 import MyAccount from "./pages/MyAccount";
 import CollectionPage from "./pages/CollectionPage";
@@ -15,6 +16,7 @@ import CartPage from "./pages/CartPage";
 import MyOrders from "./pages/MyOrders";
 import OrderDetails from "./pages/OrderDetails";
 import OrderSuccess from "./pages/OrderSuccess";
+
 
 import AboutUs from "./pages/AboutUs";
 import ContactUs from "./pages/ContactUs";
@@ -55,6 +57,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/shop" element={<ShopPage />} />
           <Route path="/collections/:category" element={<CollectionPage />} />
           <Route path="/collection/:category/specification/:id" element={<ProductSpecification />} />
