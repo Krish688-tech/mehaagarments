@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
@@ -161,6 +162,55 @@ const Login = () => {
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    if (!credentialResponse.credential) {
+      return Swal.fire({
+        icon: "error",
+        title: "Google Sign-In Failed",
+        text: "Google did not return a valid credential. Please try again.",
+        confirmButtonColor: "#000000",
+      });
+    }
+
+    try {
+      setLoading(true);
+
+      const { data } = await axios.post(`${API_URL}/auth/google`, {
+        credential: credentialResponse.credential,
+      });
+
+      login(data);
+
+      await Swal.fire({
+        icon: "success",
+        title: "Welcome to Mehaa Garments",
+        text: `Welcome, ${data.user?.name || "Customer"}`,
+        timer: 1500,
+        showConfirmButton: false,
+      });
+
+      if (data.user?.role === "admin") {
+        navigate("/admin/products", { replace: true });
+        return;
+      }
+
+      const redirectPath = location.state?.from?.pathname || "/";
+
+      navigate(redirectPath, { replace: true });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Google Sign-In Failed",
+        text:
+          error.response?.data?.message ||
+          "Unable to sign in with Google. Please try again.",
+        confirmButtonColor: "#000000",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <AuthLayout title="Welcome Back" subtitle="Login to continue shopping">
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -224,6 +274,35 @@ const Login = () => {
         >
           {loading ? "Signing in..." : "Login"}
         </button>
+
+        {/* Divider */}
+        <div className="flex items-center gap-4 py-2">
+          <div className="h-px flex-1 bg-gray-200" />
+          <span className="text-xs uppercase tracking-wider text-gray-400">
+            Or continue with
+          </span>
+          <div className="h-px flex-1 bg-gray-200" />
+        </div>
+
+        {/* Google Sign-In */}
+        <div className="flex justify-center">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => {
+              Swal.fire({
+                icon: "error",
+                title: "Google Sign-In Failed",
+                text: "Unable to connect to Google. Please try again.",
+                confirmButtonColor: "#000000",
+              });
+            }}
+            theme="outline"
+            size="large"
+            shape="rectangular"
+            text="continue_with"
+            width="320"
+          />
+        </div>
 
         {/* Register */}
         <p className="text-center text-sm text-gray-500">
