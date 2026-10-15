@@ -7,11 +7,15 @@ import {
   resetPassword,
 } from "../controllers/authController.js";
 
+import { googleLogin } from "../controllers/googleAuthController.js";
+
 const router = express.Router();
 
 router.post("/register", registerUser);
 
 router.post("/login", loginUser);
+
+router.post("/google", googleLogin);
 
 router.post("/forgot-password", forgotPassword);
 
