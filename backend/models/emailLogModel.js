@@ -18,7 +18,7 @@ const emailLogSchema = new mongoose.Schema(
 
     type: {
       type: String,
-      enum: ["ORDER_CONFIRMATION", "ORDER_DELIVERED", "NEW_ORDER_ADMIN", "PASSWORD_RESET"],
+      enum: ["ORDER_CONFIRMATION", "ORDER_DISPATCHED","ORDER_DELIVERED", "NEW_ORDER_ADMIN", "PASSWORD_RESET"],
       required: true,
     },
 

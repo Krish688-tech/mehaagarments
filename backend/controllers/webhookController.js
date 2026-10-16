@@ -12,7 +12,7 @@ import {
 } from "../services/notificationService.js";
 import ShippingHistory from "../models/shippingHistoryModel.js";
 
-import { sendCustomerDeliveredEmail } from "../services/emailService.js";
+import { sendCustomerDeliveredEmail, sendCustomerDispatchedEmail } from "../services/emailService.js";
 
 // ==========================================
 // RAZORPAY WEBHOOK
@@ -1102,6 +1102,28 @@ export const handleShiprocketWebhook = async (req, res) => {
 
         orderId: order._id,
       });
+    }
+    
+    // ==========================================
+    // CUSTOMER DISPATCH CONFIRMATION EMAIL
+    // ==========================================
+
+    const dispatchStatuses = ["picked_up", "in_transit"];
+
+    if (
+      dispatchStatuses.includes(normalizedStatus) &&
+      ["picked_up", "in_transit"].includes(normalizedStatus) &&
+      !["Cancelled", "Delivered"].includes(order.orderStatus)
+    ) {
+      try {
+        await sendCustomerDispatchedEmail(updatedOrder);
+        console.log(`DISPATCH EMAIL PROCESSED: Order ${updatedOrder._id}`);
+      } catch (emailError) {
+        console.error(
+          `DISPATCH EMAIL FAILED: Order ${updatedOrder._id}`,
+          emailError?.message || emailError,
+        );
+      }
     }
 
     // ==========================================

@@ -588,6 +588,135 @@ ${orderUrl}
   });
 };
 
+/* ==========================================
+   CUSTOMER DISPATCH EMAIL
+========================================== */
+
+export const sendCustomerDispatchedEmail = async (order) => {
+  const customerEmail = order.shippingAddress?.email;
+
+  if (!customerEmail) {
+    console.warn(`Dispatch email skipped: no email for order ${order._id}`);
+    return null;
+  }
+
+  const customerName =
+    `${order.shippingAddress?.firstName || ""} ${
+      order.shippingAddress?.lastName || ""
+    }`.trim() || "Customer";
+
+  const orderNumber = order._id.toString().slice(-8).toUpperCase();
+  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+  const orderUrl = `${frontendUrl}/orders/${order._id}`;
+
+  const trackingUrl = order.shipping?.trackingUrl || null;
+  const awb = order.shipping?.awb || null;
+  const courierName = order.shipping?.courierName || null;
+
+  const subject = `Your Order Has Been Dispatched — #${orderNumber}`;
+
+  const html = `
+    <div style="margin:0;padding:30px 15px;background:#f7f5f2;font-family:Arial,Helvetica,sans-serif;">
+      <div style="max-width:650px;margin:0 auto;background:#ffffff;border-radius:18px;overflow:hidden;">
+        ${buildEmailHeader()}
+
+        <div style="padding:35px 30px;">
+          <p style="margin:0;color:#777;font-size:12px;letter-spacing:2px;text-transform:uppercase;">
+            Shipping Confirmation
+          </p>
+
+          <h1 style="margin:10px 0;color:#171717;font-family:Georgia,serif;font-size:30px;font-weight:normal;">
+            Your order is on its way!
+          </h1>
+
+          <p style="color:#555;font-size:15px;line-height:1.7;">
+            Hi ${customerName}, your Mehaa Garments order has been handed over
+            to the courier for delivery. Thank you for shopping with us!
+          </p>
+
+          <div style="margin-top:25px;padding:18px;background:#f8f8f8;border-radius:12px;">
+            <p style="margin:0;color:#888;font-size:12px;">ORDER ID</p>
+            <p style="margin:5px 0 0;color:#171717;font-size:16px;font-weight:bold;">
+              #${orderNumber}
+            </p>
+
+            ${
+              courierName
+                ? `<p style="margin:14px 0 0;color:#777;font-size:13px;">COURIER PARTNER</p>
+                   <p style="margin:5px 0 0;color:#171717;font-weight:600;">${courierName}</p>`
+                : ""
+            }
+
+            ${
+              awb
+                ? `<p style="margin:14px 0 0;color:#777;font-size:13px;">TRACKING / AWB NUMBER</p>
+                   <p style="margin:5px 0 0;color:#171717;font-weight:600;">${awb}</p>`
+                : ""
+            }
+          </div>
+
+          ${
+            trackingUrl
+              ? `<div style="text-align:center;margin-top:28px;">
+                   <a href="${trackingUrl}" style="display:inline-block;padding:13px 25px;background:#111111;color:#ffffff;text-decoration:none;border-radius:30px;font-size:14px;font-weight:600;">
+                     Track Your Order
+                   </a>
+                 </div>`
+              : `<p style="color:#777;font-size:13px;line-height:1.6;margin-top:22px;">
+                   Tracking details will be available when provided by the courier.
+                 </p>`
+          }
+
+          <div style="margin-top:28px;padding:18px;background:#fff8ed;border:1px solid #f0dfc4;border-radius:12px;">
+            <h2 style="margin:0 0 8px;color:#171717;font-size:16px;">
+              Important Order Information
+            </h2>
+            <p style="margin:0;color:#555;font-size:13px;line-height:1.8;">
+              Your order has been dispatched. Routine change-of-mind
+              cancellations are not available after dispatch under our
+              cancellation policy. This does not limit any rights or remedies
+              available to you under applicable law.
+            </p>
+          </div>
+
+          <div style="text-align:center;margin-top:30px;">
+            <a href="${orderUrl}" style="display:inline-block;padding:13px 25px;background:#111111;color:#ffffff;text-decoration:none;border-radius:30px;font-size:14px;font-weight:600;">
+              View My Order
+            </a>
+          </div>
+
+          ${buildEmailFooter()}
+        </div>
+      </div>
+    </div>
+  `;
+
+  const text = `
+Your Order Has Been Dispatched — Mehaa Garments
+
+Hi ${customerName},
+
+Your order #${orderNumber} has been handed over to the courier.
+
+${courierName ? `Courier: ${courierName}` : ""}
+${awb ? `Tracking / AWB Number: ${awb}` : ""}
+${trackingUrl ? `Track your order: ${trackingUrl}` : ""}
+
+Routine change-of-mind cancellations are not available after dispatch under our cancellation policy. This does not limit any rights or remedies available to you under applicable law.
+
+View your order: ${orderUrl}
+  `.trim();
+
+  return sendEmail({
+    to: customerEmail,
+    subject,
+    html,
+    text,
+    orderId: order._id,
+    emailType: "ORDER_DISPATCHED",
+  });
+};
+
 // ==========================================
 // CUSTOMER DELIVERED EMAIL
 // ==========================================
@@ -994,6 +1123,7 @@ Total: ${formatCurrency(order.totalPrice)}
 export default {
   sendEmail,
   sendCustomerOrderConfirmationEmail,
+  sendCustomerDispatchedEmail,
   sendCustomerDeliveredEmail,
   sendAdminNewOrderEmail,
 };
