@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import useSEO from "../hooks/useSEO";
 import { ChevronDown } from "lucide-react";
 import axios from "axios";
 
@@ -176,7 +177,14 @@ const CollectionPage = () => {
     if (category) {
       fetchProducts();
     }
-  }, [category, uniqueCategoryData, sortOption, page, appliedMinPrice, appliedMaxPrice]);
+  }, [
+    category,
+    uniqueCategoryData,
+    sortOption,
+    page,
+    appliedMinPrice,
+    appliedMaxPrice,
+  ]);
 
   // =========================================================
   // CATEGORY CHANGE
@@ -256,13 +264,56 @@ const CollectionPage = () => {
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ")} Sarees`;
 
+  const seoTitle = (() => {
+    const name = collectionData?.name || categoryTitle;
+
+    if (uniqueCategoryData) {
+      const uniqueSeoTitles = {
+        "cotton-elegance": "Cotton Saree Collection",
+        "silk-heritage": "Silk Saree Collection",
+        "festive-glow": "Festive Saree Collection",
+        "modern-tradition": "Traditional & Contemporary Sarees",
+        "royal-weaves": "Premium Saree Collection",
+      };
+
+      const title = uniqueSeoTitles[category];
+
+      return title
+        ? `${title} | Mehaa Garments`
+        : `${name} | Saree Collection | Mehaa Garments`;
+    }
+
+    const categorySeoTitles = {
+      "cotton-sarees": "Buy Cotton Sarees Online",
+      "silk-sarees": "Shop Silk Sarees Online",
+      "designer-sarees": "Shop Designer Sarees Online",
+      "daily-wear": "Daily Wear Sarees Online",
+    };
+
+    const title = categorySeoTitles[category];
+
+    return title
+      ? `${title} | Mehaa Garments`
+      : `${name} | Shop Sarees Online | Mehaa Garments`;
+  })();
+
+  const seoDescription = uniqueCategoryData
+    ? `Explore the ${collectionData?.name || categoryTitle} collection at Mehaa Garments. Discover beautiful sarees for celebrations, traditional occasions and everyday elegance.`
+    : `Explore ${collectionData?.name || categoryTitle} at Mehaa Garments. Shop sarees online and discover beautiful styles for everyday wear, celebrations and special occasions.`;
+
+  useSEO({
+    title: seoTitle,
+    description: seoDescription,
+    canonicalUrl: `https://mehaagarments.in/collections/${category}`,
+  });
+
   // =========================================================
   // CATEGORY IMAGE
   // =========================================================
 
   const categoryImage =
-  collectionData?.image ||
-  "https://images.unsplash.com/photo-1610030469983-98e550d6193c";
+    collectionData?.image ||
+    "https://images.unsplash.com/photo-1610030469983-98e550d6193c";
 
   // =========================================================
   // RENDER
