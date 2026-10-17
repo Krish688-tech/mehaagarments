@@ -1,12 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
-import {
-  ChevronDown,
-  Search,
-  X,
-  SlidersHorizontal,
-} from "lucide-react";
+import useSEO from "../hooks/useSEO";
+import { ChevronDown, Search, X, SlidersHorizontal } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -54,8 +50,7 @@ const ShopPage = () => {
 
   const [loading, setLoading] = useState(true);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
-  const [uniqueCategoriesLoading, setUniqueCategoriesLoading] =
-    useState(true);
+  const [uniqueCategoriesLoading, setUniqueCategoriesLoading] = useState(true);
   const [error, setError] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
@@ -156,12 +151,9 @@ const ShopPage = () => {
       try {
         setUniqueCategoriesLoading(true);
 
-        const { data } = await axios.get(
-          `${API_URL}/unique-categories`,
-          {
-            signal: controller.signal,
-          },
-        );
+        const { data } = await axios.get(`${API_URL}/unique-categories`, {
+          signal: controller.signal,
+        });
 
         const collectionList = Array.isArray(data)
           ? data
@@ -173,10 +165,7 @@ const ShopPage = () => {
       } catch (error) {
         if (error.name === "CanceledError") return;
 
-        console.error(
-          "Failed to fetch unique collections:",
-          error,
-        );
+        console.error("Failed to fetch unique collections:", error);
 
         setUniqueCategories([]);
       } finally {
@@ -238,9 +227,7 @@ const ShopPage = () => {
           },
         );
 
-        setProducts(
-          Array.isArray(data.products) ? data.products : [],
-        );
+        setProducts(Array.isArray(data.products) ? data.products : []);
 
         setPagination(
           data.pagination || {
@@ -282,6 +269,14 @@ const ShopPage = () => {
     appliedMaxPrice,
   ]);
 
+  useSEO({
+    title:
+      "Shop Sarees Online | Cotton, Silk & Designer Sarees | Mehaa Garments",
+    description:
+      "Explore sarees online at Mehaa Garments. Discover elegant cotton sarees, silk sarees, designer sarees and everyday styles for different occasions.",
+    canonicalUrl: "https://mehaagarments.in/shop",
+  });
+
   // =========================================================
   // UPDATE URL PARAMETERS
   // =========================================================
@@ -290,11 +285,7 @@ const ShopPage = () => {
     const params = new URLSearchParams(searchParams);
 
     Object.entries(updates).forEach(([key, value]) => {
-      if (
-        value === undefined ||
-        value === null ||
-        value === ""
-      ) {
+      if (value === undefined || value === null || value === "") {
         params.delete(key);
       } else {
         params.set(key, String(value));
@@ -371,11 +362,9 @@ const ShopPage = () => {
   // =========================================================
 
   const applyPriceFilter = () => {
-    let min =
-      minPrice === "" ? "" : Number(minPrice);
+    let min = minPrice === "" ? "" : Number(minPrice);
 
-    let max =
-      maxPrice === "" ? "" : Number(maxPrice);
+    let max = maxPrice === "" ? "" : Number(maxPrice);
 
     if (min !== "" && Number.isNaN(min)) {
       min = "";
@@ -393,11 +382,7 @@ const ShopPage = () => {
       max = 0;
     }
 
-    if (
-      min !== "" &&
-      max !== "" &&
-      max < min
-    ) {
+    if (min !== "" && max !== "" && max < min) {
       max = min;
     }
 
@@ -441,9 +426,7 @@ const ShopPage = () => {
     }
 
     return `${pagination.totalProducts} ${
-      pagination.totalProducts === 1
-        ? "saree"
-        : "sarees"
+      pagination.totalProducts === 1 ? "saree" : "sarees"
     }`;
   }, [loading, pagination.totalProducts]);
 
@@ -452,12 +435,9 @@ const ShopPage = () => {
   // =========================================================
 
   const handleProductClick = (product) => {
-    const productCategory =
-      product.category || "all";
+    const productCategory = product.category || "all";
 
-    navigate(
-      `/collection/${productCategory}/specification/${product._id}`,
-    );
+    navigate(`/collection/${productCategory}/specification/${product._id}`);
   };
 
   // =========================================================
@@ -466,19 +446,13 @@ const ShopPage = () => {
 
   const getDiscount = (product) => {
     const price = Number(product.price) || 0;
-    const oldPrice =
-      Number(product.oldPrice) || 0;
+    const oldPrice = Number(product.oldPrice) || 0;
 
-    if (
-      oldPrice <= price ||
-      oldPrice <= 0
-    ) {
+    if (oldPrice <= price || oldPrice <= 0) {
       return 0;
     }
 
-    return Math.round(
-      ((oldPrice - price) / oldPrice) * 100,
-    );
+    return Math.round(((oldPrice - price) / oldPrice) * 100);
   };
 
   // =========================================================
@@ -486,20 +460,14 @@ const ShopPage = () => {
   // =========================================================
 
   const getCategoryName = (slug) => {
-    const found = categories.find(
-      (item) => item.slug === slug,
-    );
+    const found = categories.find((item) => item.slug === slug);
 
     if (found?.name) {
       return found.name;
     }
 
     return slug
-      ? slug
-          .replace(/-/g, " ")
-          .replace(/\b\w/g, (char) =>
-            char.toUpperCase(),
-          )
+      ? slug.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())
       : "All Sarees";
   };
 
@@ -508,20 +476,14 @@ const ShopPage = () => {
   // =========================================================
 
   const getUniqueCategoryName = (slug) => {
-    const found = uniqueCategories.find(
-      (item) => item.slug === slug,
-    );
+    const found = uniqueCategories.find((item) => item.slug === slug);
 
     if (found?.name) {
       return found.name;
     }
 
     return slug
-      ? slug
-          .replace(/-/g, " ")
-          .replace(/\b\w/g, (char) =>
-            char.toUpperCase(),
-          )
+      ? slug.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())
       : "Our Unique Collections";
   };
 
@@ -539,22 +501,14 @@ const ShopPage = () => {
     }
 
     return "";
-  }, [
-    category,
-    uniqueCategory,
-    categories,
-    uniqueCategories,
-  ]);
+  }, [category, uniqueCategory, categories, uniqueCategories]);
 
   // =========================================================
   // PAGINATION
   // =========================================================
 
   const goToPage = (newPage) => {
-    if (
-      newPage < 1 ||
-      newPage > pagination.totalPages
-    ) {
+    if (newPage < 1 || newPage > pagination.totalPages) {
       return;
     }
 
@@ -596,10 +550,7 @@ const ShopPage = () => {
     }
 
     const start = Math.max(2, page - 1);
-    const end = Math.min(
-      total - 1,
-      page + 1,
-    );
+    const end = Math.min(total - 1, page + 1);
 
     for (let i = start; i <= end; i++) {
       pages.push(i);
@@ -618,14 +569,9 @@ const ShopPage = () => {
   // HAS ACTIVE FILTERS
   // =========================================================
 
-  const hasActiveFilters =
-    Boolean(
-      search ||
-        category ||
-        uniqueCategory ||
-        appliedMinPrice ||
-        appliedMaxPrice,
-    );
+  const hasActiveFilters = Boolean(
+    search || category || uniqueCategory || appliedMinPrice || appliedMaxPrice,
+  );
 
   return (
     <main className="min-h-screen bg-[#faf9f7] text-[#171717]">
@@ -645,9 +591,8 @@ const ShopPage = () => {
             </h1>
 
             <p className="mt-5 text-sm sm:text-base text-gray-500 leading-7 max-w-xl mx-auto">
-              Discover timeless weaves, graceful
-              textures and elegant sarees curated
-              for every occasion.
+              Discover timeless weaves, graceful textures and elegant sarees
+              curated for every occasion.
             </p>
           </div>
 
@@ -665,9 +610,7 @@ const ShopPage = () => {
               <input
                 type="search"
                 value={searchInput}
-                onChange={(e) =>
-                  setSearchInput(e.target.value)
-                }
+                onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="Search sarees, fabrics, styles..."
                 className="w-full h-14 pl-13 pr-12 rounded-full bg-white border border-gray-200 outline-none focus:border-black transition shadow-sm text-sm"
               />
@@ -675,9 +618,7 @@ const ShopPage = () => {
               {searchInput && (
                 <button
                   type="button"
-                  onClick={() =>
-                    setSearchInput("")
-                  }
+                  onClick={() => setSearchInput("")}
                   className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition"
                   aria-label="Clear search"
                 >
@@ -702,9 +643,7 @@ const ShopPage = () => {
           <div className="hidden md:flex items-center justify-center gap-2 flex-wrap mb-6">
             <button
               type="button"
-              onClick={() =>
-                handleCategoryChange("")
-              }
+              onClick={() => handleCategoryChange("")}
               className={`px-5 py-2.5 rounded-full text-sm transition ${
                 !category && !uniqueCategory
                   ? "bg-black text-white"
@@ -717,15 +656,9 @@ const ShopPage = () => {
             {!categoriesLoading &&
               categories.map((item) => (
                 <button
-                  key={
-                    item._id || item.slug
-                  }
+                  key={item._id || item.slug}
                   type="button"
-                  onClick={() =>
-                    handleCategoryChange(
-                      item.slug,
-                    )
-                  }
+                  onClick={() => handleCategoryChange(item.slug)}
                   className={`px-5 py-2.5 rounded-full text-sm transition ${
                     category === item.slug
                       ? "bg-black text-white"
@@ -741,39 +674,28 @@ const ShopPage = () => {
               UNIQUE COLLECTION NAVIGATION
           ================================================= */}
 
-          {!uniqueCategoriesLoading &&
-            uniqueCategories.length > 0 && (
-              <div className="flex items-center justify-center gap-2 flex-wrap mb-10">
-                <span className="w-full text-center text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-1">
-                  Our Unique Collections
-                </span>
+          {!uniqueCategoriesLoading && uniqueCategories.length > 0 && (
+            <div className="flex items-center justify-center gap-2 flex-wrap mb-10">
+              <span className="w-full text-center text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-1">
+                Our Unique Collections
+              </span>
 
-                {uniqueCategories.map(
-                  (item) => (
-                    <button
-                      key={
-                        item._id ||
-                        item.slug
-                      }
-                      type="button"
-                      onClick={() =>
-                        handleUniqueCategoryChange(
-                          item.slug,
-                        )
-                      }
-                      className={`px-5 py-2.5 rounded-full text-sm transition ${
-                        uniqueCategory ===
-                        item.slug
-                          ? "bg-black text-white"
-                          : "bg-white text-gray-600 hover:text-black border border-gray-200"
-                      }`}
-                    >
-                      {item.name}
-                    </button>
-                  ),
-                )}
-              </div>
-            )}
+              {uniqueCategories.map((item) => (
+                <button
+                  key={item._id || item.slug}
+                  type="button"
+                  onClick={() => handleUniqueCategoryChange(item.slug)}
+                  className={`px-5 py-2.5 rounded-full text-sm transition ${
+                    uniqueCategory === item.slug
+                      ? "bg-black text-white"
+                      : "bg-white text-gray-600 hover:text-black border border-gray-200"
+                  }`}
+                >
+                  {item.name}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* =================================================
               TOOLBAR
@@ -781,9 +703,7 @@ const ShopPage = () => {
 
           <div className="flex items-center justify-between gap-4 mb-8 border-y border-gray-200 py-5">
             <div>
-              <p className="text-sm text-gray-500">
-                {resultText}
-              </p>
+              <p className="text-sm text-gray-500">{resultText}</p>
 
               {activeCollectionName && (
                 <p className="text-xs text-gray-400 mt-1">
@@ -797,14 +717,10 @@ const ShopPage = () => {
 
               <button
                 type="button"
-                onClick={() =>
-                  setFilterOpen(true)
-                }
+                onClick={() => setFilterOpen(true)}
                 className="md:hidden flex items-center gap-2 px-4 py-2.5 rounded-full border border-gray-200 bg-white text-sm"
               >
-                <SlidersHorizontal
-                  size={16}
-                />
+                <SlidersHorizontal size={16} />
                 Filters
               </button>
 
@@ -813,56 +729,38 @@ const ShopPage = () => {
               <div className="relative">
                 <button
                   type="button"
-                  onClick={() =>
-                    setSortOpen(
-                      (prev) => !prev,
-                    )
-                  }
+                  onClick={() => setSortOpen((prev) => !prev)}
                   className="flex items-center gap-3 px-4 sm:px-5 py-2.5 rounded-full border border-gray-200 bg-white text-sm min-w-38 justify-between"
                 >
                   <span>
-                    {SORT_OPTIONS.find(
-                      (item) =>
-                        item.value === sort,
-                    )?.label ||
+                    {SORT_OPTIONS.find((item) => item.value === sort)?.label ||
                       "Best Selling"}
                   </span>
 
                   <ChevronDown
                     size={16}
                     className={`transition-transform ${
-                      sortOpen
-                        ? "rotate-180"
-                        : ""
+                      sortOpen ? "rotate-180" : ""
                     }`}
                   />
                 </button>
 
                 {sortOpen && (
                   <div className="absolute right-0 top-12 z-30 w-52 bg-white border border-gray-100 rounded-2xl shadow-xl p-2">
-                    {SORT_OPTIONS.map(
-                      (option) => (
-                        <button
-                          key={
-                            option.value
-                          }
-                          type="button"
-                          onClick={() =>
-                            handleSortChange(
-                              option.value,
-                            )
-                          }
-                          className={`w-full text-left px-4 py-3 rounded-xl text-sm transition ${
-                            sort ===
-                            option.value
-                              ? "bg-black text-white"
-                              : "hover:bg-gray-100"
-                          }`}
-                        >
-                          {option.label}
-                        </button>
-                      ),
-                    )}
+                    {SORT_OPTIONS.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => handleSortChange(option.value)}
+                        className={`w-full text-left px-4 py-3 rounded-xl text-sm transition ${
+                          sort === option.value
+                            ? "bg-black text-white"
+                            : "hover:bg-gray-100"
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
                   </div>
                 )}
               </div>
@@ -881,16 +779,12 @@ const ShopPage = () => {
             <aside className="hidden lg:block">
               <div className="sticky top-28">
                 <div className="flex items-center justify-between mb-7">
-                  <h2 className="font-serif text-2xl">
-                    Filters
-                  </h2>
+                  <h2 className="font-serif text-2xl">Filters</h2>
 
                   {hasActiveFilters && (
                     <button
                       type="button"
-                      onClick={
-                        clearFilters
-                      }
+                      onClick={clearFilters}
                       className="text-xs text-gray-500 hover:text-black underline underline-offset-4"
                     >
                       Clear
@@ -910,61 +804,34 @@ const ShopPage = () => {
                   <div className="space-y-3">
                     <button
                       type="button"
-                      onClick={() =>
-                        handleCategoryChange(
-                          "",
-                        )
-                      }
+                      onClick={() => handleCategoryChange("")}
                       className={`flex items-center justify-between w-full text-sm ${
-                        !category &&
-                        !uniqueCategory
+                        !category && !uniqueCategory
                           ? "text-black font-medium"
                           : "text-gray-500 hover:text-black"
                       }`}
                     >
-                      <span>
-                        All Sarees
-                      </span>
+                      <span>All Sarees</span>
 
-                      {!category &&
-                        !uniqueCategory && (
-                          <span>✓</span>
-                        )}
+                      {!category && !uniqueCategory && <span>✓</span>}
                     </button>
 
-                    {categories.map(
-                      (item) => (
-                        <button
-                          key={
-                            item._id ||
-                            item.slug
-                          }
-                          type="button"
-                          onClick={() =>
-                            handleCategoryChange(
-                              item.slug,
-                            )
-                          }
-                          className={`flex items-center justify-between w-full text-sm ${
-                            category ===
-                            item.slug
-                              ? "text-black font-medium"
-                              : "text-gray-500 hover:text-black"
-                          }`}
-                        >
-                          <span>
-                            {item.name}
-                          </span>
+                    {categories.map((item) => (
+                      <button
+                        key={item._id || item.slug}
+                        type="button"
+                        onClick={() => handleCategoryChange(item.slug)}
+                        className={`flex items-center justify-between w-full text-sm ${
+                          category === item.slug
+                            ? "text-black font-medium"
+                            : "text-gray-500 hover:text-black"
+                        }`}
+                      >
+                        <span>{item.name}</span>
 
-                          {category ===
-                            item.slug && (
-                            <span>
-                              ✓
-                            </span>
-                          )}
-                        </button>
-                      ),
-                    )}
+                        {category === item.slug && <span>✓</span>}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
@@ -972,53 +839,32 @@ const ShopPage = () => {
                     UNIQUE COLLECTIONS
                 ================================================= */}
 
-                {!uniqueCategoriesLoading &&
-                  uniqueCategories.length >
-                    0 && (
-                    <div className="border-t border-gray-200 py-6">
-                      <p className="text-xs uppercase tracking-[0.2em] text-gray-500 mb-5">
-                        Unique Collections
-                      </p>
+                {!uniqueCategoriesLoading && uniqueCategories.length > 0 && (
+                  <div className="border-t border-gray-200 py-6">
+                    <p className="text-xs uppercase tracking-[0.2em] text-gray-500 mb-5">
+                      Unique Collections
+                    </p>
 
-                      <div className="space-y-3">
-                        {uniqueCategories.map(
-                          (item) => (
-                            <button
-                              key={
-                                item._id ||
-                                item.slug
-                              }
-                              type="button"
-                              onClick={() =>
-                                handleUniqueCategoryChange(
-                                  item.slug,
-                                )
-                              }
-                              className={`flex items-center justify-between w-full text-sm ${
-                                uniqueCategory ===
-                                item.slug
-                                  ? "text-black font-medium"
-                                  : "text-gray-500 hover:text-black"
-                              }`}
-                            >
-                              <span>
-                                {
-                                  item.name
-                                }
-                              </span>
+                    <div className="space-y-3">
+                      {uniqueCategories.map((item) => (
+                        <button
+                          key={item._id || item.slug}
+                          type="button"
+                          onClick={() => handleUniqueCategoryChange(item.slug)}
+                          className={`flex items-center justify-between w-full text-sm ${
+                            uniqueCategory === item.slug
+                              ? "text-black font-medium"
+                              : "text-gray-500 hover:text-black"
+                          }`}
+                        >
+                          <span>{item.name}</span>
 
-                              {uniqueCategory ===
-                                item.slug && (
-                                <span>
-                                  ✓
-                                </span>
-                              )}
-                            </button>
-                          ),
-                        )}
-                      </div>
+                          {uniqueCategory === item.slug && <span>✓</span>}
+                        </button>
+                      ))}
                     </div>
-                  )}
+                  </div>
+                )}
 
                 {/* =================================================
                     PRICE
@@ -1031,38 +877,26 @@ const ShopPage = () => {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs text-gray-400">
-                        Minimum
-                      </label>
+                      <label className="text-xs text-gray-400">Minimum</label>
 
                       <input
                         type="number"
                         min="0"
                         value={minPrice}
-                        onChange={(e) =>
-                          setMinPrice(
-                            e.target.value,
-                          )
-                        }
+                        onChange={(e) => setMinPrice(e.target.value)}
                         placeholder="₹ Min"
                         className="w-full mt-2 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-black"
                       />
                     </div>
 
                     <div>
-                      <label className="text-xs text-gray-400">
-                        Maximum
-                      </label>
+                      <label className="text-xs text-gray-400">Maximum</label>
 
                       <input
                         type="number"
                         min="0"
                         value={maxPrice}
-                        onChange={(e) =>
-                          setMaxPrice(
-                            e.target.value,
-                          )
-                        }
+                        onChange={(e) => setMaxPrice(e.target.value)}
                         placeholder="₹ Max"
                         className="w-full mt-2 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-black"
                       />
@@ -1071,9 +905,7 @@ const ShopPage = () => {
 
                   <button
                     type="button"
-                    onClick={
-                      applyPriceFilter
-                    }
+                    onClick={applyPriceFilter}
                     className="w-full mt-4 py-2.5 rounded-full bg-black text-white text-sm hover:bg-gray-800 transition"
                   >
                     Apply Price
@@ -1093,13 +925,8 @@ const ShopPage = () => {
 
               {loading && (
                 <div className="grid grid-cols-2 xl:grid-cols-3 gap-x-4 sm:gap-x-6 gap-y-10">
-                  {[
-                    1, 2, 3, 4, 5, 6,
-                  ].map((item) => (
-                    <div
-                      key={item}
-                      className="animate-pulse"
-                    >
+                  {[1, 2, 3, 4, 5, 6].map((item) => (
+                    <div key={item} className="animate-pulse">
                       <div className="aspect-4/5 rounded-3xl bg-gray-200" />
 
                       <div className="mt-5 h-4 bg-gray-200 rounded w-4/5" />
@@ -1116,19 +943,13 @@ const ShopPage = () => {
 
               {!loading && error && (
                 <div className="min-h-80 flex flex-col items-center justify-center text-center">
-                  <p className="font-serif text-2xl">
-                    Something went wrong
-                  </p>
+                  <p className="font-serif text-2xl">Something went wrong</p>
 
-                  <p className="text-sm text-gray-500 mt-3 max-w-md">
-                    {error}
-                  </p>
+                  <p className="text-sm text-gray-500 mt-3 max-w-md">{error}</p>
 
                   <button
                     type="button"
-                    onClick={() =>
-                      window.location.reload()
-                    }
+                    onClick={() => window.location.reload()}
                     className="mt-6 px-6 py-3 rounded-full bg-black text-white text-sm"
                   >
                     Try Again
@@ -1140,297 +961,199 @@ const ShopPage = () => {
                   EMPTY
               ================================================= */}
 
-              {!loading &&
-                !error &&
-                products.length === 0 && (
-                  <div className="min-h-80 flex flex-col items-center justify-center text-center">
-                    <div className="w-16 h-16 rounded-full bg-white border border-gray-200 flex items-center justify-center">
-                      <Search
-                        size={22}
-                        className="text-gray-400"
-                      />
-                    </div>
-
-                    <h2 className="font-serif text-2xl mt-6">
-                      No sarees found
-                    </h2>
-
-                    <p className="text-sm text-gray-500 mt-2 max-w-sm">
-                      Try another search or
-                      clear your filters to
-                      explore the complete
-                      collection.
-                    </p>
-
-                    <button
-                      type="button"
-                      onClick={
-                        clearFilters
-                      }
-                      className="mt-6 px-6 py-3 rounded-full bg-black text-white text-sm"
-                    >
-                      View All Sarees
-                    </button>
+              {!loading && !error && products.length === 0 && (
+                <div className="min-h-80 flex flex-col items-center justify-center text-center">
+                  <div className="w-16 h-16 rounded-full bg-white border border-gray-200 flex items-center justify-center">
+                    <Search size={22} className="text-gray-400" />
                   </div>
-                )}
+
+                  <h2 className="font-serif text-2xl mt-6">No sarees found</h2>
+
+                  <p className="text-sm text-gray-500 mt-2 max-w-sm">
+                    Try another search or clear your filters to explore the
+                    complete collection.
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="mt-6 px-6 py-3 rounded-full bg-black text-white text-sm"
+                  >
+                    View All Sarees
+                  </button>
+                </div>
+              )}
 
               {/* =================================================
                   PRODUCT GRID
               ================================================= */}
 
-              {!loading &&
-                !error &&
-                products.length > 0 && (
-                  <>
-                    <div className="grid grid-cols-2 xl:grid-cols-3 gap-x-4 sm:gap-x-6 gap-y-12">
-                      {products.map(
-                        (product) => {
-                          const discount =
-                            getDiscount(
-                              product,
-                            );
+              {!loading && !error && products.length > 0 && (
+                <>
+                  <div className="grid grid-cols-2 xl:grid-cols-3 gap-x-4 sm:gap-x-6 gap-y-12">
+                    {products.map((product) => {
+                      const discount = getDiscount(product);
 
-                          return (
-                            <article
-                              key={
-                                product._id
-                              }
-                              onClick={() =>
-                                handleProductClick(
-                                  product,
-                                )
-                              }
-                              className="group cursor-pointer"
-                            >
-                              {/* PRODUCT IMAGE */}
+                      return (
+                        <article
+                          key={product._id}
+                          onClick={() => handleProductClick(product)}
+                          className="group cursor-pointer"
+                        >
+                          {/* PRODUCT IMAGE */}
 
-                              <div className="relative overflow-hidden rounded-3xl bg-white aspect-4/5">
-                                <img
-                                  src={
-                                    product.image
-                                  }
-                                  alt={
-                                    product.name
-                                  }
-                                  loading="lazy"
-                                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                />
+                          <div className="relative overflow-hidden rounded-3xl bg-white aspect-4/5">
+                            <img
+                              src={product.image}
+                              alt={product.name}
+                              loading="lazy"
+                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            />
 
-                                {/* DISCOUNT */}
+                            {/* DISCOUNT */}
 
-                                {discount >
-                                  0 && (
-                                  <span className="absolute top-4 left-4 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-sm text-[10px] uppercase tracking-wider font-medium">
-                                    Save{" "}
-                                    {
-                                      discount
-                                    }
-                                    %
-                                  </span>
-                                )}
+                            {discount > 0 && (
+                              <span className="absolute top-4 left-4 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-sm text-[10px] uppercase tracking-wider font-medium">
+                                Save {discount}%
+                              </span>
+                            )}
 
-                                {/* BEST SELLER */}
+                            {/* BEST SELLER */}
 
-                                {product.isBestSeller && (
-                                  <span className="absolute top-4 right-4 px-3 py-1.5 rounded-full bg-black text-white text-[10px] uppercase tracking-wider">
-                                    Best Seller
-                                  </span>
-                                )}
+                            {product.isBestSeller && (
+                              <span className="absolute top-4 right-4 px-3 py-1.5 rounded-full bg-black text-white text-[10px] uppercase tracking-wider">
+                                Best Seller
+                              </span>
+                            )}
 
-                                {/* OUT OF STOCK */}
+                            {/* OUT OF STOCK */}
 
-                                {Number(
-                                  product.stock,
-                                ) <= 0 && (
-                                  <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
-                                    <span className="px-4 py-2 rounded-full bg-white text-xs uppercase tracking-wider">
-                                      Sold Out
-                                    </span>
-                                  </div>
-                                )}
+                            {Number(product.stock) <= 0 && (
+                              <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
+                                <span className="px-4 py-2 rounded-full bg-white text-xs uppercase tracking-wider">
+                                  Sold Out
+                                </span>
+                              </div>
+                            )}
 
-                                {/* HOVER CTA */}
+                            {/* HOVER CTA */}
 
-                                {Number(
-                                  product.stock,
-                                ) > 0 && (
-                                  <div className="absolute bottom-4 left-4 right-4 opacity-0 translate-y-3 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-                                    <button
-                                      type="button"
-                                      onClick={(
-                                        e,
-                                      ) => {
-                                        e.stopPropagation();
+                            {Number(product.stock) > 0 && (
+                              <div className="absolute bottom-4 left-4 right-4 opacity-0 translate-y-3 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
 
-                                        handleProductClick(
-                                          product,
-                                        );
-                                      }}
-                                      className="w-full py-3 rounded-full bg-white/95 backdrop-blur-sm text-black text-xs font-medium shadow-lg"
-                                    >
-                                      View
-                                      Product
-                                    </button>
-                                  </div>
+                                    handleProductClick(product);
+                                  }}
+                                  className="w-full py-3 rounded-full bg-white/95 backdrop-blur-sm text-black text-xs font-medium shadow-lg"
+                                >
+                                  View Product
+                                </button>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* PRODUCT DETAILS */}
+
+                          <div className="pt-5 px-1">
+                            <p className="text-[10px] uppercase tracking-[0.18em] text-gray-400 mb-2">
+                              {getCategoryName(product.category)}
+                            </p>
+
+                            <h3 className="font-serif text-lg sm:text-xl leading-snug line-clamp-2">
+                              {product.name}
+                            </h3>
+
+                            <div className="flex items-center gap-2 mt-3">
+                              <span className="text-sm sm:text-base font-medium">
+                                ₹{Number(product.price).toLocaleString("en-IN")}
+                              </span>
+
+                              {Number(product.oldPrice) >
+                                Number(product.price) && (
+                                <span className="text-xs sm:text-sm text-gray-400 line-through">
+                                  ₹
+                                  {Number(product.oldPrice).toLocaleString(
+                                    "en-IN",
+                                  )}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* RATING */}
+
+                            {product.rating > 0 && (
+                              <div className="flex items-center gap-1 mt-2 text-xs text-gray-500">
+                                <span>★</span>
+
+                                <span>{Number(product.rating).toFixed(1)}</span>
+
+                                {product.reviews > 0 && (
+                                  <span>({product.reviews})</span>
                                 )}
                               </div>
+                            )}
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
 
-                              {/* PRODUCT DETAILS */}
-
-                              <div className="pt-5 px-1">
-                                <p className="text-[10px] uppercase tracking-[0.18em] text-gray-400 mb-2">
-                                  {getCategoryName(
-                                    product.category,
-                                  )}
-                                </p>
-
-                                <h3 className="font-serif text-lg sm:text-xl leading-snug line-clamp-2">
-                                  {
-                                    product.name
-                                  }
-                                </h3>
-
-                                <div className="flex items-center gap-2 mt-3">
-                                  <span className="text-sm sm:text-base font-medium">
-                                    ₹
-                                    {Number(
-                                      product.price,
-                                    ).toLocaleString(
-                                      "en-IN",
-                                    )}
-                                  </span>
-
-                                  {Number(
-                                    product.oldPrice,
-                                  ) >
-                                    Number(
-                                      product.price,
-                                    ) && (
-                                    <span className="text-xs sm:text-sm text-gray-400 line-through">
-                                      ₹
-                                      {Number(
-                                        product.oldPrice,
-                                      ).toLocaleString(
-                                        "en-IN",
-                                      )}
-                                    </span>
-                                  )}
-                                </div>
-
-                                {/* RATING */}
-
-                                {product.rating >
-                                  0 && (
-                                  <div className="flex items-center gap-1 mt-2 text-xs text-gray-500">
-                                    <span>
-                                      ★
-                                    </span>
-
-                                    <span>
-                                      {Number(
-                                        product.rating,
-                                      ).toFixed(
-                                        1,
-                                      )}
-                                    </span>
-
-                                    {product.reviews >
-                                      0 && (
-                                      <span>
-                                        (
-                                        {
-                                          product.reviews
-                                        }
-                                        )
-                                      </span>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                            </article>
-                          );
-                        },
-                      )}
-                    </div>
-
-                    {/* =================================================
+                  {/* =================================================
                         PAGINATION
                     ================================================= */}
 
-                    {pagination.totalPages >
-                      1 && (
-                      <div className="flex items-center justify-center gap-2 mt-16">
-                        <button
-                          type="button"
-                          disabled={
-                            !pagination.hasPreviousPage
-                          }
-                          onClick={() =>
-                            goToPage(
-                              page - 1,
-                            )
-                          }
-                          className="px-4 py-2.5 rounded-full border border-gray-200 bg-white text-sm disabled:opacity-30 disabled:cursor-not-allowed hover:border-black transition"
-                        >
-                          Previous
-                        </button>
+                  {pagination.totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-2 mt-16">
+                      <button
+                        type="button"
+                        disabled={!pagination.hasPreviousPage}
+                        onClick={() => goToPage(page - 1)}
+                        className="px-4 py-2.5 rounded-full border border-gray-200 bg-white text-sm disabled:opacity-30 disabled:cursor-not-allowed hover:border-black transition"
+                      >
+                        Previous
+                      </button>
 
-                        <div className="flex items-center gap-1">
-                          {pageNumbers.map(
-                            (
-                              item,
-                              index,
-                            ) =>
-                              item ===
-                              "..." ? (
-                                <span
-                                  key={`dots-${index}`}
-                                  className="w-9 text-center text-gray-400"
-                                >
-                                  …
-                                </span>
-                              ) : (
-                                <button
-                                  key={
-                                    item
-                                  }
-                                  type="button"
-                                  onClick={() =>
-                                    goToPage(
-                                      item,
-                                    )
-                                  }
-                                  className={`w-10 h-10 rounded-full text-sm transition ${
-                                    page ===
-                                    item
-                                      ? "bg-black text-white"
-                                      : "bg-white border border-gray-200 hover:border-black"
-                                  }`}
-                                >
-                                  {item}
-                                </button>
-                              ),
-                          )}
-                        </div>
-
-                        <button
-                          type="button"
-                          disabled={
-                            !pagination.hasNextPage
-                          }
-                          onClick={() =>
-                            goToPage(
-                              page + 1,
-                            )
-                          }
-                          className="px-4 py-2.5 rounded-full border border-gray-200 bg-white text-sm disabled:opacity-30 disabled:cursor-not-allowed hover:border-black transition"
-                        >
-                          Next
-                        </button>
+                      <div className="flex items-center gap-1">
+                        {pageNumbers.map((item, index) =>
+                          item === "..." ? (
+                            <span
+                              key={`dots-${index}`}
+                              className="w-9 text-center text-gray-400"
+                            >
+                              …
+                            </span>
+                          ) : (
+                            <button
+                              key={item}
+                              type="button"
+                              onClick={() => goToPage(item)}
+                              className={`w-10 h-10 rounded-full text-sm transition ${
+                                page === item
+                                  ? "bg-black text-white"
+                                  : "bg-white border border-gray-200 hover:border-black"
+                              }`}
+                            >
+                              {item}
+                            </button>
+                          ),
+                        )}
                       </div>
-                    )}
-                  </>
-                )}
+
+                      <button
+                        type="button"
+                        disabled={!pagination.hasNextPage}
+                        onClick={() => goToPage(page + 1)}
+                        className="px-4 py-2.5 rounded-full border border-gray-200 bg-white text-sm disabled:opacity-30 disabled:cursor-not-allowed hover:border-black transition"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -1444,22 +1167,16 @@ const ShopPage = () => {
         <div className="fixed inset-0 z-1000 lg:hidden">
           <div
             className="absolute inset-0 bg-black/40"
-            onClick={() =>
-              setFilterOpen(false)
-            }
+            onClick={() => setFilterOpen(false)}
           />
 
           <aside className="absolute right-0 top-0 h-full w-[88%] max-w-md bg-[#faf9f7] shadow-2xl overflow-y-auto">
             <div className="sticky top-0 bg-[#faf9f7]/95 backdrop-blur-md border-b border-gray-200 px-6 py-5 flex items-center justify-between z-10">
-              <h2 className="font-serif text-2xl">
-                Filters
-              </h2>
+              <h2 className="font-serif text-2xl">Filters</h2>
 
               <button
                 type="button"
-                onClick={() =>
-                  setFilterOpen(false)
-                }
+                onClick={() => setFilterOpen(false)}
                 className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center"
                 aria-label="Close filters"
               >
@@ -1480,55 +1197,33 @@ const ShopPage = () => {
                 <div className="space-y-2">
                   <button
                     type="button"
-                    onClick={() =>
-                      handleCategoryChange(
-                        "",
-                      )
-                    }
+                    onClick={() => handleCategoryChange("")}
                     className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm ${
-                      !category &&
-                      !uniqueCategory
+                      !category && !uniqueCategory
                         ? "bg-black text-white"
                         : "bg-white border border-gray-200"
                     }`}
                   >
                     All Sarees
-
-                    {!category &&
-                      !uniqueCategory && (
-                        <span>✓</span>
-                      )}
+                    {!category && !uniqueCategory && <span>✓</span>}
                   </button>
 
-                  {categories.map(
-                    (item) => (
-                      <button
-                        key={
-                          item._id ||
-                          item.slug
-                        }
-                        type="button"
-                        onClick={() =>
-                          handleCategoryChange(
-                            item.slug,
-                          )
-                        }
-                        className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm ${
-                          category ===
-                          item.slug
-                            ? "bg-black text-white"
-                            : "bg-white border border-gray-200"
-                        }`}
-                      >
-                        {item.name}
+                  {categories.map((item) => (
+                    <button
+                      key={item._id || item.slug}
+                      type="button"
+                      onClick={() => handleCategoryChange(item.slug)}
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm ${
+                        category === item.slug
+                          ? "bg-black text-white"
+                          : "bg-white border border-gray-200"
+                      }`}
+                    >
+                      {item.name}
 
-                        {category ===
-                          item.slug && (
-                          <span>✓</span>
-                        )}
-                      </button>
-                    ),
-                  )}
+                      {category === item.slug && <span>✓</span>}
+                    </button>
+                  ))}
                 </div>
               </div>
 
@@ -1536,51 +1231,32 @@ const ShopPage = () => {
                   MOBILE UNIQUE COLLECTIONS
               ================================================= */}
 
-              {!uniqueCategoriesLoading &&
-                uniqueCategories.length >
-                  0 && (
-                  <div className="border-t border-gray-200 mt-8 pt-8">
-                    <p className="text-xs uppercase tracking-[0.2em] text-gray-500 mb-5">
-                      Unique Collections
-                    </p>
+              {!uniqueCategoriesLoading && uniqueCategories.length > 0 && (
+                <div className="border-t border-gray-200 mt-8 pt-8">
+                  <p className="text-xs uppercase tracking-[0.2em] text-gray-500 mb-5">
+                    Unique Collections
+                  </p>
 
-                    <div className="space-y-2">
-                      {uniqueCategories.map(
-                        (item) => (
-                          <button
-                            key={
-                              item._id ||
-                              item.slug
-                            }
-                            type="button"
-                            onClick={() =>
-                              handleUniqueCategoryChange(
-                                item.slug,
-                              )
-                            }
-                            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm ${
-                              uniqueCategory ===
-                              item.slug
-                                ? "bg-black text-white"
-                                : "bg-white border border-gray-200"
-                            }`}
-                          >
-                            {
-                              item.name
-                            }
+                  <div className="space-y-2">
+                    {uniqueCategories.map((item) => (
+                      <button
+                        key={item._id || item.slug}
+                        type="button"
+                        onClick={() => handleUniqueCategoryChange(item.slug)}
+                        className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm ${
+                          uniqueCategory === item.slug
+                            ? "bg-black text-white"
+                            : "bg-white border border-gray-200"
+                        }`}
+                      >
+                        {item.name}
 
-                            {uniqueCategory ===
-                              item.slug && (
-                              <span>
-                                ✓
-                              </span>
-                            )}
-                          </button>
-                        ),
-                      )}
-                    </div>
+                        {uniqueCategory === item.slug && <span>✓</span>}
+                      </button>
+                    ))}
                   </div>
-                )}
+                </div>
+              )}
 
               {/* =================================================
                   MOBILE PRICE
@@ -1596,11 +1272,7 @@ const ShopPage = () => {
                     type="number"
                     min="0"
                     value={minPrice}
-                    onChange={(e) =>
-                      setMinPrice(
-                        e.target.value,
-                      )
-                    }
+                    onChange={(e) => setMinPrice(e.target.value)}
                     placeholder="Min ₹"
                     className="w-full border border-gray-200 rounded-xl px-4 py-3 bg-white text-sm outline-none focus:border-black"
                   />
@@ -1609,11 +1281,7 @@ const ShopPage = () => {
                     type="number"
                     min="0"
                     value={maxPrice}
-                    onChange={(e) =>
-                      setMaxPrice(
-                        e.target.value,
-                      )
-                    }
+                    onChange={(e) => setMaxPrice(e.target.value)}
                     placeholder="Max ₹"
                     className="w-full border border-gray-200 rounded-xl px-4 py-3 bg-white text-sm outline-none focus:border-black"
                   />
@@ -1621,9 +1289,7 @@ const ShopPage = () => {
 
                 <button
                   type="button"
-                  onClick={
-                    applyPriceFilter
-                  }
+                  onClick={applyPriceFilter}
                   className="w-full mt-4 py-3.5 rounded-full bg-black text-white text-sm"
                 >
                   Apply Price
