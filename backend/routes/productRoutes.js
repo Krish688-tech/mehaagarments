@@ -8,6 +8,7 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
+  getProductSitemap,
 } from "../controllers/productController.js";
 
 import { protect } from "../middleware/authMiddleware.js";
@@ -67,19 +68,20 @@ router.delete(
   deleteProduct
 );
 
-
-// =====================================================
+ // =====================================================
 // PUBLIC ROUTES
 // =====================================================
+
+// DYNAMIC PRODUCT SITEMAP
+
+router.get("/sitemap.xml", getProductSitemap);
 
 // ALL ACTIVE PRODUCTS
 
 router.get("/", getProducts);
 
-
 // SINGLE ACTIVE PRODUCT
 
 router.get("/:id", getProductById);
-
 
 export default router;

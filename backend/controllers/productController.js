@@ -869,3 +869,72 @@ export const deleteProduct = async (req, res) => {
     });
   }
 };
+
+
+/**
+ * GENERATE DYNAMIC PRODUCT SITEMAP
+ * GET /api/products/sitemap.xml
+ * PUBLIC
+ */
+export const getProductSitemap = async (req, res) => {
+  try {
+    const products = await Product.find({
+      isActive: true,
+      category: { $exists: true, $ne: "" },
+    })
+      .select("_id category updatedAt createdAt")
+      .sort({ _id: 1 })
+      .lean();
+
+    const escapeXml = (value = "") =>
+      String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
+
+    const urls = products
+      .map((product) => {
+        const category = String(product.category || "")
+          .trim()
+          .toLowerCase();
+
+        if (!category) return "";
+
+        const loc =
+          `https://mehaagarments.in/collection/` +
+          `${encodeURIComponent(category)}/specification/${product._id}`;
+
+        const lastModified = product.updatedAt || product.createdAt;
+
+        return `
+  <url>
+    <loc>${escapeXml(loc)}</loc>
+    ${
+      lastModified && !Number.isNaN(new Date(lastModified).getTime())
+        ? `<lastmod>${new Date(lastModified).toISOString()}</lastmod>`
+        : ""
+    }
+  </url>`;
+      })
+      .filter(Boolean)
+      .join("");
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}
+</urlset>`;
+
+    res.status(200);
+    res.set("Content-Type", "application/xml; charset=utf-8");
+    res.set("Cache-Control", "public, max-age=300");
+    return res.send(xml);
+  } catch (error) {
+    console.error("Generate product sitemap error:", error);
+
+    return res.status(500).type("text/plain").send(
+      "Unable to generate product sitemap.",
+    );
+  }
+};
+
