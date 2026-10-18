@@ -1,5 +1,10 @@
+
 {
   "rewrites": [
+    {
+      "source": "/sitemap.xml",
+      "destination": "https://mehaagarments.onrender.com/api/products/sitemap.xml"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"
