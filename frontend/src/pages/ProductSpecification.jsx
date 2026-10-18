@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import useSEO from "../hooks/useSEO";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { useAuth } from "../context/AuthContext";
@@ -7,7 +8,7 @@ import { useAuth } from "../context/AuthContext";
 const API_URL = import.meta.env.VITE_API_URL;
 
 const ProductSpecification = () => {
-  const { id } = useParams();
+  const { id, category } = useParams();
   const navigate = useNavigate();
   const { token, user } = useAuth();
 
@@ -33,6 +34,93 @@ const ProductSpecification = () => {
     title: "",
     comment: "",
   });
+
+  // --------------------------------------------------
+  // PRODUCT SEO
+  // --------------------------------------------------
+
+  const seoTitle = product?.name
+    ? `${product.name} | Buy Sarees Online | Mehaa Garments`
+    : "Shop Sarees Online | Mehaa Garments";
+
+  const seoDescription = product
+    ? (
+        product.description ||
+        `Explore ${product.name} at Mehaa Garments. Discover beautiful sarees with detailed product information, pricing and specifications.`
+      ).slice(0, 160)
+    : "Explore beautiful sarees at Mehaa Garments. Discover elegant styles for everyday wear, celebrations and special occasions.";
+
+  useSEO({
+    title: seoTitle,
+    description: seoDescription,
+    canonicalUrl: `https://mehaagarments.in/collection/${category || product?.category || "product"}/specification/${id}`,
+  });
+
+  
+  // --------------------------------------------------
+  // PRODUCT STRUCTURED DATA (JSON-LD)
+  // --------------------------------------------------
+
+  useEffect(() => {
+    if (!product?._id || !product?.name) return;
+
+    const productUrl = `https://mehaagarments.in/collection/${product.category || category || "product"}/specification/${product._id}`;
+
+    const productImage = product.images?.length
+      ? product.images
+      : product.image
+        ? [product.image]
+        : [];
+
+    const structuredData = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: product.name,
+      description: (
+        product.description ||
+        `Discover ${product.name} at Mehaa Garments.`
+      ).slice(0, 5000),
+      image: productImage,
+      sku: String(product._id),
+      brand: {
+        "@type": "Brand",
+        name: "Mehaa Garments",
+      },
+      offers: {
+        "@type": "Offer",
+        url: productUrl,
+        priceCurrency: "INR",
+        price: Number(product.price || 0).toFixed(2),
+        availability:
+          Number(product.stock || 0) > 0
+            ? "https://schema.org/InStock"
+            : "https://schema.org/OutOfStock",
+        itemCondition: "https://schema.org/NewCondition",
+        seller: {
+          "@type": "Organization",
+          name: "Mehaa Garments",
+          url: "https://mehaagarments.in/",
+        },
+      },
+    };
+
+    const scriptId = "product-json-ld";
+    let script = document.getElementById(scriptId);
+
+    if (!script) {
+      script = document.createElement("script");
+      script.id = scriptId;
+      script.type = "application/ld+json";
+      document.head.appendChild(script);
+    }
+
+    script.textContent = JSON.stringify(structuredData);
+
+    return () => {
+      document.getElementById(scriptId)?.remove();
+    };
+  }, [product, category]);
+
 
   // --------------------------------------------------
   // FETCH PRODUCT
