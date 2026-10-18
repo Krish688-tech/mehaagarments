@@ -872,12 +872,39 @@ export const deleteProduct = async (req, res) => {
 
 
 /**
- * GENERATE DYNAMIC PRODUCT SITEMAP
+ * GENERATE COMPLETE WEBSITE SITEMAP
  * GET /api/products/sitemap.xml
  * PUBLIC
  */
 export const getProductSitemap = async (req, res) => {
   try {
+    const baseUrl = "https://mehaagarments.in";
+
+    const staticPaths = [
+      { path: "/", frequency: "weekly", priority: "1.0" },
+      { path: "/shop", frequency: "daily", priority: "0.9" },
+
+      { path: "/collections/cotton", frequency: "weekly", priority: "0.8" },
+      { path: "/collections/silk", frequency: "weekly", priority: "0.8" },
+      { path: "/collections/designer", frequency: "weekly", priority: "0.8" },
+      { path: "/collections/daily-wear", frequency: "weekly", priority: "0.8" },
+
+      { path: "/collections/cotton-elegance", frequency: "weekly", priority: "0.8" },
+      { path: "/collections/silk-heritage", frequency: "weekly", priority: "0.8" },
+      { path: "/collections/festive-glow", frequency: "weekly", priority: "0.8" },
+      { path: "/collections/modern-tradition", frequency: "weekly", priority: "0.8" },
+      { path: "/collections/royal-weaves", frequency: "weekly", priority: "0.8" },
+
+      { path: "/about-us", frequency: "monthly", priority: "0.5" },
+      { path: "/contact-us", frequency: "monthly", priority: "0.5" },
+
+      { path: "/privacy-policy", frequency: "yearly", priority: "0.3" },
+      { path: "/shipping-policy", frequency: "yearly", priority: "0.3" },
+      { path: "/refund-policy", frequency: "yearly", priority: "0.3" },
+      { path: "/payment-policy", frequency: "yearly", priority: "0.3" },
+      { path: "/terms-and-conditions", frequency: "yearly", priority: "0.3" },
+    ];
+
     const products = await Product.find({
       isActive: true,
       category: { $exists: true, $ne: "" },
@@ -894,7 +921,18 @@ export const getProductSitemap = async (req, res) => {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&apos;");
 
-    const urls = products
+    const staticUrls = staticPaths
+      .map(
+        ({ path, frequency, priority }) => `
+  <url>
+    <loc>${escapeXml(`${baseUrl}${path}`)}</loc>
+    <changefreq>${frequency}</changefreq>
+    <priority>${priority}</priority>
+  </url>`,
+      )
+      .join("");
+
+    const productUrls = products
       .map((product) => {
         const category = String(product.category || "")
           .trim()
@@ -902,15 +940,15 @@ export const getProductSitemap = async (req, res) => {
 
         if (!category) return "";
 
-        const loc =
-          `https://mehaagarments.in/collection/` +
-          `${encodeURIComponent(category)}/specification/${product._id}`;
+        const productUrl =
+          `${baseUrl}/collection/${encodeURIComponent(category)}` +
+          `/specification/${product._id}`;
 
         const lastModified = product.updatedAt || product.createdAt;
 
         return `
   <url>
-    <loc>${escapeXml(loc)}</loc>
+    <loc>${escapeXml(productUrl)}</loc>
     ${
       lastModified && !Number.isNaN(new Date(lastModified).getTime())
         ? `<lastmod>${new Date(lastModified).toISOString()}</lastmod>`
@@ -922,19 +960,19 @@ export const getProductSitemap = async (req, res) => {
       .join("");
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${staticUrls}${productUrls}
 </urlset>`;
 
-    res.status(200);
     res.set("Content-Type", "application/xml; charset=utf-8");
     res.set("Cache-Control", "public, max-age=300");
-    return res.send(xml);
-  } catch (error) {
-    console.error("Generate product sitemap error:", error);
 
-    return res.status(500).type("text/plain").send(
-      "Unable to generate product sitemap.",
-    );
+    return res.status(200).send(xml);
+  } catch (error) {
+    console.error("Generate website sitemap error:", error);
+
+    return res
+      .status(500)
+      .type("text/plain")
+      .send("Unable to generate website sitemap.");
   }
 };
-
