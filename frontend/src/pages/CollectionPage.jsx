@@ -304,7 +304,7 @@ const CollectionPage = () => {
   useSEO({
     title: seoTitle,
     description: seoDescription,
-    canonicalUrl: `https://mehaagarments.in/collections/${category}`,
+    canonicalUrl: `https://www.mehaagarments.in/collections/${category}`,
   });
 
   // =========================================================

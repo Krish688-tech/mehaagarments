@@ -274,7 +274,7 @@ const ShopPage = () => {
       "Buy Sarees Online | Cotton, Silk, Designer & Daily Wear | Mehaa Garments",
     description:
       "Explore sarees online at Mehaa Garments, from elegant cotton and silk sarees to designer styles and everyday wear. Discover thoughtfully curated collections for festive celebrations, traditional occasions and effortless everyday elegance.",
-    canonicalUrl: "https://mehaagarments.in/shop",
+    canonicalUrl: "https://www.mehaagarments.in/shop",
   });
 
   // =========================================================

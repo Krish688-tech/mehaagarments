@@ -1,10 +1,6 @@
 import { useEffect } from "react";
 
-const useSEO = ({
-  title,
-  description,
-  canonicalUrl,
-}) => {
+const useSEO = ({ title, description, canonicalUrl }) => {
   useEffect(() => {
     if (title) {
       document.title = title;
@@ -26,13 +22,22 @@ const useSEO = ({
       element.setAttribute("content", content);
     };
 
+    const normalizedCanonical = canonicalUrl
+      ? (() => {
+          const url = new URL(canonicalUrl);
+          url.hostname = "www.mehaagarments.in";
+          url.protocol = "https:";
+          return url.href;
+        })()
+      : undefined;
+
     setMeta("name", "description", description);
     setMeta("property", "og:title", title);
     setMeta("property", "og:description", description);
-    setMeta("property", "og:url", canonicalUrl);
+    setMeta("property", "og:url", normalizedCanonical);
     setMeta("property", "og:type", "website");
 
-    if (canonicalUrl) {
+    if (normalizedCanonical) {
       let canonical = document.head.querySelector(
         'link[rel="canonical"]',
       );
@@ -43,7 +48,7 @@ const useSEO = ({
         document.head.appendChild(canonical);
       }
 
-      canonical.setAttribute("href", canonicalUrl);
+      canonical.setAttribute("href", normalizedCanonical);
     }
   }, [title, description, canonicalUrl]);
 };

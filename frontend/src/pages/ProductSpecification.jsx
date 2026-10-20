@@ -53,10 +53,9 @@ const ProductSpecification = () => {
   useSEO({
     title: seoTitle,
     description: seoDescription,
-    canonicalUrl: `https://mehaagarments.in/collection/${category || product?.category || "product"}/specification/${id}`,
+    canonicalUrl: `https://www.mehaagarments.in/collection/${category || product?.category || "product"}/specification/${id}`,
   });
 
-  
   // --------------------------------------------------
   // PRODUCT STRUCTURED DATA (JSON-LD)
   // --------------------------------------------------
@@ -77,8 +76,7 @@ const ProductSpecification = () => {
       "@type": "Product",
       name: product.name,
       description: (
-        product.description ||
-        `Discover ${product.name} at Mehaa Garments.`
+        product.description || `Discover ${product.name} at Mehaa Garments.`
       ).slice(0, 5000),
       image: productImage,
       sku: String(product._id),
@@ -120,7 +118,6 @@ const ProductSpecification = () => {
       document.getElementById(scriptId)?.remove();
     };
   }, [product, category]);
-
 
   // --------------------------------------------------
   // FETCH PRODUCT
