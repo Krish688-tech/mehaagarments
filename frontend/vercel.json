@@ -2,6 +2,10 @@
 {
   "rewrites": [
     {
+      "source": "/robots.txt",
+      "destination": "/robots.txt"
+    },
+    {
       "source": "/sitemap.xml",
       "destination": "https://mehaagarments.onrender.com/api/products/sitemap.xml"
     },
