@@ -52,10 +52,22 @@ const Hero = () => {
       {/* Background Image */}
       <img
         ref={imageRef}
-        src="https://res.cloudinary.com/dkp7rlfq4/image/upload/v1777964626/Mehaa_Garments_tkwlvf.png"
-        alt="Saree"
+        src="https://res.cloudinary.com/dkp7rlfq4/image/upload/f_auto,q_auto:good,w_1280/v1777964626/Mehaa_Garments_tkwlvf.png"
+        srcSet="
+          https://res.cloudinary.com/dkp7rlfq4/image/upload/f_auto,q_auto:good,w_640/v1777964626/Mehaa_Garments_tkwlvf.png 640w,
+          https://res.cloudinary.com/dkp7rlfq4/image/upload/f_auto,q_auto:good,w_1280/v1777964626/Mehaa_Garments_tkwlvf.png 1280w,
+          https://res.cloudinary.com/dkp7rlfq4/image/upload/f_auto,q_auto:good,w_1920/v1777964626/Mehaa_Garments_tkwlvf.png 1920w
+        "
+        sizes="100vw"
+        alt="Mehaa Garments saree collection"
+        fetchPriority="high"
+        loading="eager"
+        decoding="async"
+        width="1920"
+        height="1080"
         className="absolute w-full h-full object-cover"
       />
+
 
       {/* Overlay */}
       <div className="absolute w-full h-full bg-linear-to-t from-black/70 via-black/30 to-transparent"></div>

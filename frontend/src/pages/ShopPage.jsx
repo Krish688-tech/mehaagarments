@@ -995,11 +995,14 @@ const ShopPage = () => {
                       const discount = getDiscount(product);
 
                       return (
-                        <article
-                          key={product._id}
-                          onClick={() => handleProductClick(product)}
-                          className="group cursor-pointer"
-                        >
+                        <article key={product._id} className="group">
+                          <a
+                            href={`/collection/${encodeURIComponent(
+                              product.category || "all",
+                            )}/specification/${product._id}`}
+                            className="block cursor-pointer"
+                            aria-label={`View ${product.name}`}
+                          >
                           {/* PRODUCT IMAGE */}
 
                           <div className="relative overflow-hidden rounded-3xl bg-white aspect-4/5">
@@ -1038,7 +1041,7 @@ const ShopPage = () => {
 
                             {/* HOVER CTA */}
 
-                            {Number(product.stock) > 0 && (
+                            {/**{Number(product.stock) > 0 && (
                               <div className="absolute bottom-4 left-4 right-4 opacity-0 translate-y-3 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
                                 <button
                                   type="button"
@@ -1052,7 +1055,7 @@ const ShopPage = () => {
                                   View Product
                                 </button>
                               </div>
-                            )}
+                            )}**/}
                           </div>
 
                           {/* PRODUCT DETAILS */}
@@ -1096,6 +1099,7 @@ const ShopPage = () => {
                               </div>
                             )}
                           </div>
+                          </a>
                         </article>
                       );
                     })}
