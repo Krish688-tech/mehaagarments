@@ -67,7 +67,7 @@ const Hero = () => {
   return (
     <section
       id="home"
-      className="relative flex h-screen min-h-[600px] items-center justify-center overflow-hidden text-center"
+      className="relative flex h-screen min-h-150 items-center justify-center overflow-hidden text-center"
     >
       {/* Background Image */}
       <img
@@ -89,7 +89,7 @@ const Hero = () => {
       />
 
       {/* Background Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/30 to-transparent" />
 
       {/* Hero Content */}
       <div className="relative z-10 px-6 text-white">
@@ -110,7 +110,7 @@ const Hero = () => {
         <button
           ref={buttonRef}
           onClick={() => navigate("/shop")}
-          className="mt-8 cursor-pointer rounded-full bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 px-8 py-3 font-medium text-white shadow-lg transition-transform hover:scale-105"
+          className="mt-8 cursor-pointer rounded-full bg-linear-to-r from-pink-400 via-pink-500 to-pink-600 px-8 py-3 font-medium text-white shadow-lg transition-transform hover:scale-105"
         >
           Explore Collection
         </button>

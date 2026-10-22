@@ -159,12 +159,24 @@ const Categories = () => {
               className="group relative cursor-pointer overflow-hidden rounded-4xl bg-gray-100"
             >
               {/* IMAGE */}
-              <img
-                src={cat.image}
-                alt={cat.name}
-                loading={i < 2 ? "eager" : "lazy"}
-                className="h-105 w-full object-cover transition-transform duration-1200 ease-out group-hover:scale-105 md:h-135"
-              />
+              <div className="relative h-105 w-full overflow-hidden md:h-135">
+                {/* Blurred background fills the card */}
+                <img
+                  src={cat.image}
+                  alt=""
+                  aria-hidden="true"
+                  loading="lazy"
+                  className="absolute inset-0 h-full w-full scale-110 object-cover blur-2xl opacity-60"
+                />
+
+                {/* Main image: cover on mobile, contain on desktop */}
+                <img
+                  src={cat.image}
+                  alt={cat.name}
+                  loading={i < 2 ? "eager" : "lazy"}
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02] md:object-contain"
+                />
+              </div>
 
               {/* GRADIENT */}
               <div className="absolute inset-0 bg-linear-to-t from-black/65 via-black/10 to-transparent transition-all duration-500 group-hover:from-black/75" />
