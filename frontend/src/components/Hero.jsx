@@ -24,19 +24,19 @@ const Hero = () => {
       tl.fromTo(
         imageRef.current,
         { scale: 1.2 },
-        { scale: 1, duration: 2, ease: "power3.out" }
+        { scale: 1, duration: 2, ease: "power3.out" },
       )
         .fromTo(
           titleRef.current,
           { y: 80, opacity: 0 },
           { y: 0, opacity: 1, duration: 1 },
-          "-=1.5"
+          "-=1.5",
         )
         .fromTo(
           subtitleRef.current,
           { y: 40, opacity: 0 },
           { y: 0, opacity: 1, duration: 1 },
-          "-=0.8"
+          "-=0.8",
         )
         .fromTo(
           buttonRef.current,
@@ -47,7 +47,7 @@ const Hero = () => {
             duration: 0.8,
             ease: "back.out(1.7)",
           },
-          "-=0.6"
+          "-=0.6",
         );
 
       // Continuous marquee movement
@@ -70,15 +70,10 @@ const Hero = () => {
       className="relative flex h-screen min-h-150 items-center justify-center overflow-hidden text-center"
     >
       {/* Background Image */}
+      {/* Background Image */}
       <img
         ref={imageRef}
-        src="https://res.cloudinary.com/dkp7rlfq4/image/upload/f_auto,q_auto:good,w_1280/v1777964626/Mehaa_Garments_tkwlvf.png"
-        srcSet="
-          https://res.cloudinary.com/dkp7rlfq4/image/upload/f_auto,q_auto:good,w_640/v1777964626/Mehaa_Garments_tkwlvf.png 640w,
-          https://res.cloudinary.com/dkp7rlfq4/image/upload/f_auto,q_auto:good,w_1280/v1777964626/Mehaa_Garments_tkwlvf.png 1280w,
-          https://res.cloudinary.com/dkp7rlfq4/image/upload/f_auto,q_auto:good,w_1920/v1777964626/Mehaa_Garments_tkwlvf.png 1920w
-        "
-        sizes="100vw"
+        src="https://res.cloudinary.com/dkp7rlfq4/image/upload/v1792686680/Mehaa_Garments_m7a9lh.webp"
         alt="Mehaa Garments saree collection"
         fetchPriority="high"
         loading="eager"
@@ -87,10 +82,9 @@ const Hero = () => {
         height="1080"
         className="absolute inset-0 h-full w-full object-cover"
       />
-
+      
       {/* Background Overlay */}
       <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/30 to-transparent" />
-
       {/* Hero Content */}
       <div className="relative z-10 px-6 text-white">
         <h1
@@ -100,10 +94,7 @@ const Hero = () => {
           Elegance in Every Saree
         </h1>
 
-        <p
-          ref={subtitleRef}
-          className="mt-4 text-base sm:text-lg md:text-xl"
-        >
+        <p ref={subtitleRef} className="mt-4 text-base sm:text-lg md:text-xl">
           Discover timeless tradition with modern style
         </p>
 
@@ -115,7 +106,6 @@ const Hero = () => {
           Explore Collection
         </button>
       </div>
-
       {/* Temporary Development Marquee */}
       <div className="absolute inset-x-0 bottom-0 z-20 overflow-hidden border-t border-white/20 bg-black/40 py-3 backdrop-blur-sm sm:py-4">
         <div
