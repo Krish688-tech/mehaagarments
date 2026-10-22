@@ -5,7 +5,7 @@ const categories = [
     description:
       "Lightweight and comfortable cotton sarees for everyday elegance.",
     image:
-      "https://res.cloudinary.com/dkp7rlfq4/image/upload/v1792673067/mehaa_garments_cotton_sarees_lsdhvh.jpg",
+      "https://res.cloudinary.com/dkp7rlfq4/image/upload/v1792688019/mehaa_garments_cotton_sarees_cmkxvc.webp",
     isActive: true,
     displayOrder: 1,
   },
@@ -16,7 +16,7 @@ const categories = [
     description:
       "Rich and elegant silk sarees for celebrations and special occasions.",
     image:
-      "https://res.cloudinary.com/dkp7rlfq4/image/upload/v1792673065/mehaa_garments_silk_sarees_a91mkr.jpg",
+      "https://res.cloudinary.com/dkp7rlfq4/image/upload/v1792688019/mehaa_garments_silk_sarees_lot7g5.webp",
     isActive: true,
     displayOrder: 2,
   },
@@ -27,7 +27,7 @@ const categories = [
     description:
       "Contemporary designer sarees combining modern style with tradition.",
     image:
-      "https://res.cloudinary.com/dkp7rlfq4/image/upload/v1792673065/mehaa_garments_designer_sarees_quepzm.jpg",
+      "https://res.cloudinary.com/dkp7rlfq4/image/upload/v1792688019/mehaa_garments_designer_sarees_abtapp.webp",
     isActive: true,
     displayOrder: 3,
   },
@@ -38,7 +38,7 @@ const categories = [
     description:
       "Comfortable sarees designed for effortless everyday wear.",
     image:
-      "https://res.cloudinary.com/dkp7rlfq4/image/upload/v1792673068/mehaa_garments_daily_wear_saree_vprv46.png",
+      "https://res.cloudinary.com/dkp7rlfq4/image/upload/v1792688019/mehaa_garments_daily_wear_saree_wbnopd.webp",
     isActive: true,
     displayOrder: 4,
   },
