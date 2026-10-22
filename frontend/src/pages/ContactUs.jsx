@@ -11,7 +11,7 @@ import {
 import { FaInstagram, FaFacebookF, FaYoutube } from "react-icons/fa";
 
 const ContactUs = () => {
-  const whatsappNumber = "919999999999";
+  const whatsappNumber = "917418541436";
 
   const whatsappMessage = encodeURIComponent(
     "Hello Mehaa Garments, I would like to know more about your sarees."
@@ -84,7 +84,7 @@ const ContactUs = () => {
 
           {/* Phone */}
           <a
-            href="tel:+919999999999"
+            href="tel:+917418541436"
             className="group bg-white border border-gray-200 rounded-4xl p-8 sm:p-10 min-h-75 flex flex-col justify-between hover:border-gray-400 transition"
           >
             <div className="flex items-start justify-between">
@@ -113,7 +113,7 @@ const ContactUs = () => {
               </p>
 
               <p className="text-sm text-black mt-6">
-                +91 99999 99999
+                +91 74185 41436
               </p>
             </div>
           </a>
@@ -176,7 +176,7 @@ const ContactUs = () => {
                   </p>
 
                   <p className="text-sm text-gray-600 leading-7 mt-2">
-                    Your GST Registered Business Address
+                    No 48, 1st Floor, Kalaignar Karunanithi Street, Villupuram.
                     <br />
                     Tamil Nadu, India
                   </p>
@@ -194,10 +194,10 @@ const ContactUs = () => {
                   </p>
 
                   <a
-                    href="tel:+919999999999"
+                    href="tel:+917418541436"
                     className="text-sm text-gray-600 mt-2 inline-block hover:text-black transition"
                   >
-                    +91 99999 99999
+                    +91 74185 41436
                   </a>
                 </div>
               </div>

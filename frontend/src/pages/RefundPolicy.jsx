@@ -669,11 +669,11 @@ const RefundPolicy = () => {
                       </p>
 
                       <p className="text-sm text-gray-500 mt-3">
-                        Phone / WhatsApp: +91 99999 99999
+                        Phone / WhatsApp: +91 74185 41436
                       </p>
 
                       <p className="text-sm text-gray-400 mt-2">
-                        Official business email coming soon
+                        Support@mehaagarments.com
                       </p>
                     </div>
                   </div>
@@ -702,7 +702,7 @@ const RefundPolicy = () => {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
             <a
-              href="https://wa.me/919999999999"
+              href="https://wa.me/917418541436"
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-3 px-7 py-3.5 rounded-full bg-white text-black text-sm hover:bg-white/90 transition"

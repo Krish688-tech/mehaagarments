@@ -434,7 +434,7 @@ const ShippingPolicy = () => {
               </div>
 
               <a
-                href={`https://wa.me/919999999999?text=${encodeURIComponent(
+                href={`https://wa.me/917418541436?text=${encodeURIComponent(
                   "Hello Mehaa Garments, I would like to enquire about a custom Pattu saree / blouse with Aari work."
                 )}`}
                 target="_blank"
@@ -471,7 +471,7 @@ const ShippingPolicy = () => {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
             <a
-              href="https://wa.me/919999999999"
+              href="https://wa.me/917418541436"
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-3 px-7 py-3.5 rounded-full bg-black text-white text-sm hover:bg-gray-800 transition"

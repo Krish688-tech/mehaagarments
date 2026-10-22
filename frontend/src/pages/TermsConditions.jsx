@@ -753,7 +753,7 @@ const TermsConditions = () => {
                 <p>
                   No. 48, First Floor,
                   <br />
-                  Kalangnar Karunanithi Street,
+                  Kalaignar Karunanithi Street,
                   <br />
                   Salamedu,
                   <br />

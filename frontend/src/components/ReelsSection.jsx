@@ -1,260 +1,266 @@
-import { useLayoutEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-gsap.registerPlugin(ScrollTrigger);
+import { useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
 const reels = [
   {
     video:
-      "https://res.cloudinary.com/dkp7rlfq4/video/upload/q_auto,w_720,vc_auto/Video01_eolbyq.mp4",
-    title: "Maheshwari Saree",
-    desc: "Elegant handcrafted cotton saree with rich texture",
+      
+       "https://res.cloudinary.com/dkp7rlfq4/video/upload/q_auto,w_720,vc_auto/Video3_prr64u.mp4",
+    title: "Cotton Elegance",
+    desc: "Elegant handcrafted cotton saree with rich texture.",
     slug: "cotton-elegance",
+    number: "01",
+    label: "TIMELESS CRAFT",
   },
   {
     video:
-      "https://res.cloudinary.com/dkp7rlfq4/video/upload/q_auto,w_720,vc_auto/Video3_prr64u.mp4",
-    title: "Silk Classic",
-    desc: "Premium silk saree for festive occasions",
+     "https://res.cloudinary.com/dkp7rlfq4/video/upload/v1792655469/Silk_heritage_gf6jrw.mp4",
+    title: "Silk Heritage",
+    desc: "Premium silk saree for festive occasions.",
     slug: "silk-heritage",
+    number: "02",
+    label: "SILK STORIES",
   },
   {
     video:
-      "https://res.cloudinary.com/dkp7rlfq4/video/upload/q_auto,w_720,vc_auto/Video04_kyt20y.mp4",
-    title: "Soft Cotton",
-    desc: "Lightweight saree for daily comfort",
+      "https://res.cloudinary.com/dkp7rlfq4/video/upload/v1792658857/festive_glow_aovuzv.mp4",
+    title: "Festive Glow",
+    desc: "Lightweight saree for everyday comfort.",
     slug: "festive-glow",
+    number: "03",
+    label: "EVERYDAY GRACE",
   },
   {
     video:
-      "https://res.cloudinary.com/dkp7rlfq4/video/upload/q_auto,w_720,vc_auto/Video02_o5ur3k.mp4",
-    title: "Royal Pattu",
-    desc: "Traditional bridal collection",
+      "https://res.cloudinary.com/dkp7rlfq4/video/upload/v1792663883/mehaa_garments_royal_weaves_hcdxqd.mp4",
+    title: "Royal Weaves",
+    desc: "Traditional elegance for your most special moments.",
     slug: "royal-weaves",
+    number: "04",
+    label: "ROYAL TRADITION",
   },
   {
     video:
-      "https://res.cloudinary.com/dkp7rlfq4/video/upload/q_auto,w_720,vc_auto/Video03_qukffd.mp4",
+      "https://res.cloudinary.com/dkp7rlfq4/video/upload/q_auto,w_720,vc_auto/Video01_eolbyq.mp4",
     title: "Modern Drape",
-    desc: "Fusion of modern and ethnic style",
+    desc: "Contemporary styling rooted in Indian tradition.",
     slug: "modern-tradition",
+    number: "05",
+    label: "A MODERN CLASSIC",
   },
 ];
 
-const ReelScroll = () => {
-  const sectionRef = useRef(null);
-  const slidesRef = useRef([]);
-  const videoRefs = useRef([]);
-  const navigate = useNavigate();
+const ReelCard = ({ item, index, registerVideo, onNavigate }) => {
+  const cardRef = useRef(null);
+  const videoRef = useRef(null);
 
-  useLayoutEffect(() => {
-    const section = sectionRef.current;
+  useEffect(() => {
+    const card = cardRef.current;
+    const video = videoRef.current;
 
-    if (!section) return;
+    if (!card || !video) return;
 
-    const ctx = gsap.context(() => {
-      const slides = slidesRef.current.filter(Boolean);
+    registerVideo(index, video);
 
-      if (!slides.length) return;
-
-      const HOLD_DURATION = 2.2;
-      const TRANSITION_DURATION = 1;
-
-      slides.forEach((slide, i) => {
-        if (i !== 0) {
-          gsap.set(slide, {
-            yPercent: 100,
-            opacity: 0,
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          video.play().catch(() => {
+            // The browser may block autoplay due to device settings.
           });
-        }
-      });
-
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: section,
-          start: "top top",
-          end: `+=${slides.length * 180}%`,
-          scrub: 1,
-          pin: true,
-          pinSpacing: true,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        },
-      });
-
-      // Hold the first reel before moving to the second
-      tl.to(
-        {},
-        {
-          duration: HOLD_DURATION,
-        },
-      );
-
-      slides.forEach((slide, i) => {
-        if (i === 0) return;
-
-        // Transition to next reel
-        tl.to(slide, {
-          yPercent: 0,
-          opacity: 1,
-          duration: TRANSITION_DURATION,
-          ease: "power3.out",
-        });
-
-        // Play only the current reel
-        tl.call(() => {
-          videoRefs.current.forEach((video, index) => {
-            if (!video) return;
-
-            if (index === i) {
-              if (video.paused) {
-                const promise = video.play();
-
-                if (promise) {
-                  promise.catch(() => {});
-                }
-              }
-            } else {
-              video.pause();
-            }
-          });
-        });
-
-        // Hold the current reel before the next transition
-        tl.to(
-          {},
-          {
-            duration: HOLD_DURATION,
-          },
-        );
-      });
-
-      // Play first reel immediately
-      const firstVideo = videoRefs.current[0];
-
-      if (firstVideo) {
-        const promise = firstVideo.play();
-
-        if (promise) {
-          promise.catch(() => {});
-        }
-      }
-    }, section);
-
-    return () => {
-      videoRefs.current.forEach((video) => {
-        if (video) {
+        } else {
           video.pause();
         }
-      });
+      },
+      {
+        threshold: 0.35,
+      },
+    );
 
-      ctx.revert();
+    observer.observe(card);
+
+    return () => {
+      observer.disconnect();
+      video.pause();
+      registerVideo(index, null);
     };
-  }, []);
+  }, [index, registerVideo]);
 
   return (
-    <div className="w-full bg-white">
-      {/* ==========================================
-          CREATIVE SPACE / REELS INTRO
-      ========================================== */}
-
-      <section className="relative flex min-h-[55vh] items-center justify-center overflow-hidden bg-white px-6 py-24 md:min-h-[60vh]">
-        <div className="absolute left-1/2 top-0 h-20 w-px -translate-x-1/2 bg-black/10 md:h-28" />
-
-        <div className="relative z-10 mx-auto max-w-3xl text-center">
-          <p className="mb-5 text-[10px] font-medium uppercase tracking-[0.45em] text-gray-400 md:text-xs">
-            The Mehaa Reels
-          </p>
-
-          <h2 className="text-4xl font-light leading-tight tracking-tight text-gray-900 sm:text-5xl md:text-7xl">
-            Sarees in Motion
-          </h2>
-
-          <div className="mx-auto mt-6 h-px w-12 bg-gray-300 md:mt-8 md:w-16" />
-
-          <p className="mx-auto mt-6 max-w-xl text-sm leading-7 text-gray-500 md:mt-8 md:text-base md:leading-8">
-            Discover the details, textures and beauty behind every drape. A
-            closer look at the sarees that define Mehaa Garments.
-          </p>
-        </div>
-
-        <div className="absolute bottom-0 left-1/2 h-16 w-px -translate-x-1/2 bg-black/10 md:h-20" />
-      </section>
-
-      {/* ==========================================
-          REEL SCROLL SECTION
-      ========================================== */}
-
-      <section
-        ref={sectionRef}
-        className="relative z-20 isolate h-screen w-full overflow-hidden bg-black"
+    <article ref={cardRef} className="group min-w-0">
+      <button
+        type="button"
+        onClick={() => onNavigate(item.slug)}
+        aria-label={`Explore ${item.title} collection`}
+        className="relative block w-full overflow-hidden rounded-md bg-[#e9e1d6] text-left focus-visible:outline focus-visible:outline-offset-4 focus-visible:outline-[#8b7355]"
       >
-        {reels.map((item, i) => (
-          <div
-            key={item.title}
-            ref={(el) => {
-              slidesRef.current[i] = el;
-            }}
-            onClick={() => navigate(`/collections/${item.slug}`)}
-            className="absolute inset-0 flex h-full w-full cursor-pointer items-center justify-center"
-            style={{ zIndex: i }}
-          >
-            {/* VIDEO */}
+        <div className="relative aspect-3/4 w-full overflow-hidden">
+          <video
+            ref={videoRef}
+            src={item.video}
+            muted
+            loop
+            playsInline
+            autoPlay
+            preload="none"
+            aria-label={item.title}
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.025]"
+          />
 
-            <video
-              ref={(el) => {
-                videoRefs.current[i] = el;
-              }}
-              src={item.video}
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              className="absolute inset-0 h-full w-full object-cover"
-            />
+          {/* Cinematic overlay */}
+          <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/70 via-black/5 to-black/20" />
 
-            {/* DARK OVERLAY */}
+          {/* Editorial category label */}
+          <div className="pointer-events-none absolute left-4 top-5 flex items-center gap-2 sm:left-5 sm:top-6">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#e8d5ae]" />
+            <span className="text-[9px] font-medium tracking-[0.22em] text-white sm:text-[10px]">
+              {item.label}
+            </span>
+          </div>
 
-            <div className="absolute inset-0 bg-black/40" />
+          {/* Film details */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 p-5 text-white sm:p-6">
+            <p className="mb-2 text-[9px] tracking-[0.25em] text-white/75 sm:text-[10px]">
+              MEHAA GARMENTS
+            </p>
 
-            {/* CONTENT */}
+            <h3 className="font-serif text-2xl font-normal leading-tight sm:text-3xl">
+              {item.title}
+            </h3>
 
-            <div className="relative z-10 max-w-2xl px-6 text-center text-white md:px-10">
-              <p className="mb-4 text-[10px] uppercase tracking-[0.4em] text-white/70 md:text-xs">
-                Mehaa Garments
-              </p>
+            <p className="mt-2 max-w-60 text-xs leading-5 text-white/85 sm:text-sm sm:leading-6">
+              {item.desc}
+            </p>
 
-              <h2 className="text-3xl font-semibold leading-tight sm:text-4xl md:text-6xl">
-                {item.title}
-              </h2>
+            <div className="mt-5 flex items-center justify-between border-t border-white/35 pt-3">
+              <span className="text-[9px] tracking-[0.2em] sm:text-[10px]">
+                DISCOVER THE COLLECTION
+              </span>
 
-              <p className="mx-auto mt-4 max-w-lg text-sm leading-6 text-white/80 sm:text-base md:text-lg md:leading-8">
-                {item.desc}
-              </p>
-
-              <p className="mt-3 text-xs uppercase tracking-[0.25em] text-white/50 md:text-sm">
-                From Mehaa Garments
-              </p>
-
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/collections/${item.slug}`);
-                }}
-                className="mt-7 inline-flex items-center gap-3 rounded-full bg-white px-6 py-3 text-xs font-medium uppercase tracking-[0.18em] text-black transition-all duration-500 hover:gap-5 hover:bg-white/90 sm:px-7 sm:py-3.5 sm:text-sm"
-              >
-                Buy Now
-                <span className="text-base">→</span>
-              </button>
+              <span className="text-lg transition-transform duration-300 group-hover:translate-x-1">
+                →
+              </span>
             </div>
           </div>
-        ))}
-      </section>
-    </div>
+        </div>
+      </button>
+
+      {/* Film footer */}
+      <div className="flex items-center justify-between border-b border-[#dcd2c5] py-3">
+        <span className="text-[10px] tracking-[0.2em] text-[#8a7968]">
+          FILM NO. {item.number}
+        </span>
+
+        <button
+          type="button"
+          onClick={() => onNavigate(item.slug)}
+          className="text-[10px] font-medium uppercase tracking-[0.16em] text-[#4b3a2b] transition-colors hover:text-[#9a7652]"
+        >
+          Shop now ↗
+        </button>
+      </div>
+    </article>
   );
 };
 
-export default ReelScroll;
+const ReelsSection = () => {
+  const navigate = useNavigate();
+  const videosRef = useRef([]);
+
+  const registerVideo = (index, video) => {
+    videosRef.current[index] = video;
+  };
+
+  const handleNavigate = (slug) => {
+    videosRef.current.forEach((video) => {
+      if (video) video.pause();
+    });
+
+    navigate(`/collections/${slug}`);
+  };
+
+  return (
+    <section className="overflow-hidden bg-[#faf9f7] px-4 py-14 sm:px-6 sm:py-16 lg:px-12 lg:py-20">
+      <div className="mx-auto max-w-360">
+        {/* Centered editorial heading */}
+        <header className="mx-auto mb-10 max-w-4xl text-center sm:mb-12 lg:mb-14">
+          <div className="mb-3 flex items-center justify-center gap-3">
+            <span className="h-px w-9 bg-[#9b8062]" />
+
+            <p className="text-[10px] font-medium uppercase tracking-[0.32em] text-[#8b7355]">
+              The Mehaa Reels
+            </p>
+
+            <span className="h-px w-9 bg-[#9b8062]" />
+          </div>
+
+          <h2 className="font-light tracking-[-0.035em] text-[#1d1d1d] text-4xl sm:text-5xl md:text-6xl lg:text-7xl">
+            Sarees in Motion
+          </h2>
+
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-[#786d62] sm:mt-4 sm:text-base sm:leading-7">
+            Discover the colours, textures and craftsmanship behind every
+            beautiful drape.
+          </p>
+
+          {/* Supporting title stays centered on desktop and mobile */}
+          {/**<div className="mt-6 border-t border-[#dfd5c9] pt-5 sm:mt-7 sm:pt-6">
+            <h3 className="font-serif text-3xl font-normal leading-[1.08] tracking-[-0.035em] text-[#30261f] sm:text-4xl lg:text-5xl">
+              Every Drape
+              <br />
+              <span className="italic text-[#967a5c]">
+                Tells a Story.
+              </span>
+            </h3>
+
+            <div className="mt-4 flex items-center justify-center gap-3">
+              <span className="font-serif text-2xl italic text-[#967a5c]">
+                05
+              </span>
+
+              <span className="h-7 w-px bg-[#d7cbbc]" />
+
+              <span className="text-left text-[9px] uppercase leading-5 tracking-[0.2em] text-[#786d62]">
+                Fashion Films
+                <br />
+                By Mehaa
+              </span>
+            </div>
+          </div>**/}
+        </header>
+
+        {/* Responsive video gallery */}
+        <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 sm:gap-y-10 lg:grid-cols-3 lg:gap-x-7 lg:gap-y-12">
+          {reels.map((item, index) => (
+            <ReelCard
+              key={item.slug}
+              item={item}
+              index={index}
+              registerVideo={registerVideo}
+              onNavigate={handleNavigate}
+            />
+          ))}
+        </div>
+
+        {/* Closing editorial line */}
+        <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-[#dcd2c5] pt-6 sm:mt-16 sm:flex-row sm:items-center lg:mt-20">
+          <p className="font-serif text-lg italic text-[#786d62]">
+            Tradition, beautifully in motion.
+          </p>
+
+          <button
+            type="button"
+            onClick={() => navigate("/shop")}
+            className="inline-flex items-center gap-3 border-b border-[#8b7355] pb-2 text-[10px] font-medium uppercase tracking-[0.2em] text-[#4b3a2b] transition-colors hover:text-[#9a7652]"
+          >
+            Explore all collections
+            <span className="text-base">→</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default ReelsSection;

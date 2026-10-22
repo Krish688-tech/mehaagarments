@@ -135,7 +135,7 @@ const AboutUs = () => {
                   <p className="text-sm text-gray-600 leading-7">
                     No. 48, First Floor,
                     <br />
-                    Kalangnar Karunanithi Street,
+                    Kalaignar Karunanithi Street,
                     <br />
                     Salamedu, Villupuram,
                     <br />
@@ -230,7 +230,7 @@ const AboutUs = () => {
                 </p>
 
                 <a
-                  href="https://wa.me/919999999999"
+                  href="https://wa.me/917418541436"
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-3 mt-8 px-6 py-3.5 rounded-full bg-white text-black text-sm hover:bg-white/90 transition"

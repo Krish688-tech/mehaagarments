@@ -29,10 +29,19 @@ const PrivacyPolicy = () => {
             </h1>
 
             <p className="max-w-2xl text-sm sm:text-base text-gray-500 leading-8 mt-8">
-              Your privacy matters to us. {/**This Privacy Policy explains how
+              Your privacy matters to us.{" "}
+              {/**This Privacy Policy explains how
               Mehaa Garments collects, uses, stores and protects information
               when you visit our website, place an order or communicate with
-              us.**/} Mehaa Garments respects your privacy and is committed to protecting and responsibly handling your personal information. This Privacy Policy explains how we collect, use, store, disclose and protect personal information when you visit our website, create an account, place an order, communicate with us through WhatsApp or otherwise use our services. We handle personal information in accordance with applicable Indian data-protection, consumer-protection and other applicable laws and regulations.
+              us.**/}{" "}
+              Mehaa Garments respects your privacy and is committed to
+              protecting and responsibly handling your personal information.
+              This Privacy Policy explains how we collect, use, store, disclose
+              and protect personal information when you visit our website,
+              create an account, place an order, communicate with us through
+              WhatsApp or otherwise use our services. We handle personal
+              information in accordance with applicable Indian data-protection,
+              consumer-protection and other applicable laws and regulations.
             </p>
 
             <p className="text-xs text-gray-400 mt-6">
@@ -48,22 +57,18 @@ const PrivacyPolicy = () => {
           <div className="bg-white border border-gray-200 rounded-2xl p-6">
             <ShieldCheck size={20} />
 
-            <h2 className="font-serif text-xl mt-5">
-              Responsible Use
-            </h2>
+            <h2 className="font-serif text-xl mt-5">Responsible Use</h2>
 
             <p className="text-xs text-gray-500 leading-6 mt-3">
-              We use customer information for legitimate business purposes
-              such as processing and delivering orders.
+              We use customer information for legitimate business purposes such
+              as processing and delivering orders.
             </p>
           </div>
 
           <div className="bg-white border border-gray-200 rounded-2xl p-6">
             <LockKeyhole size={20} />
 
-            <h2 className="font-serif text-xl mt-5">
-              Secure Transactions
-            </h2>
+            <h2 className="font-serif text-xl mt-5">Secure Transactions</h2>
 
             <p className="text-xs text-gray-500 leading-6 mt-3">
               Payment transactions are processed through authorised payment
@@ -74,22 +79,18 @@ const PrivacyPolicy = () => {
           <div className="bg-white border border-gray-200 rounded-2xl p-6">
             <Database size={20} />
 
-            <h2 className="font-serif text-xl mt-5">
-              Limited Collection
-            </h2>
+            <h2 className="font-serif text-xl mt-5">Limited Collection</h2>
 
             <p className="text-xs text-gray-500 leading-6 mt-3">
-              We seek to collect information that is relevant to providing
-              our products and services.
+              We seek to collect information that is relevant to providing our
+              products and services.
             </p>
           </div>
 
           <div className="bg-white border border-gray-200 rounded-2xl p-6">
             <UserRound size={20} />
 
-            <h2 className="font-serif text-xl mt-5">
-              Your Privacy
-            </h2>
+            <h2 className="font-serif text-xl mt-5">Your Privacy</h2>
 
             <p className="text-xs text-gray-500 leading-6 mt-3">
               You can contact us regarding questions or requests relating to
@@ -212,9 +213,7 @@ const PrivacyPolicy = () => {
                 01
               </p>
 
-              <h2 className="font-serif text-3xl sm:text-4xl">
-                Introduction
-              </h2>
+              <h2 className="font-serif text-3xl sm:text-4xl">Introduction</h2>
 
               <div className="space-y-5 text-sm sm:text-[15px] text-gray-600 leading-8 mt-6">
                 <p>
@@ -232,14 +231,17 @@ const PrivacyPolicy = () => {
 
                 <p>
                   By using our website or providing your personal information,
-                  you acknowledge that you have read and understood this
-                  Privacy Policy.
+                  you acknowledge that you have read and understood this Privacy
+                  Policy.
                 </p>
               </div>
             </section>
 
             {/* 02 */}
-            <section id="information" className="border-t border-gray-200 py-14">
+            <section
+              id="information"
+              className="border-t border-gray-200 py-14"
+            >
               <p className="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4">
                 02
               </p>
@@ -276,11 +278,11 @@ const PrivacyPolicy = () => {
                 </h3>
 
                 <p>
-                  When you visit our website, certain technical information
-                  may be collected automatically, such as browser type,
-                  device information, approximate location derived from
-                  technical data, IP address, pages visited and information
-                  about how you interact with the website.
+                  When you visit our website, certain technical information may
+                  be collected automatically, such as browser type, device
+                  information, approximate location derived from technical data,
+                  IP address, pages visited and information about how you
+                  interact with the website.
                 </p>
               </div>
             </section>
@@ -296,40 +298,26 @@ const PrivacyPolicy = () => {
               </h2>
 
               <div className="space-y-5 text-sm sm:text-[15px] text-gray-600 leading-8 mt-6">
-                <p>
-                  We may use personal information for purposes including:
-                </p>
+                <p>We may use personal information for purposes including:</p>
 
                 <ul className="list-disc pl-5 space-y-2">
                   <li>Creating and managing customer accounts.</li>
 
-                  <li>
-                    Processing, confirming and fulfilling orders.
-                  </li>
+                  <li>Processing, confirming and fulfilling orders.</li>
 
-                  <li>
-                    Delivering products to the address provided by you.
-                  </li>
+                  <li>Delivering products to the address provided by you.</li>
 
-                  <li>
-                    Processing payments and confirming payment status.
-                  </li>
+                  <li>Processing payments and confirming payment status.</li>
 
-                  <li>
-                    Providing customer service and resolving complaints.
-                  </li>
+                  <li>Providing customer service and resolving complaints.</li>
 
-                  <li>
-                    Communicating with you about your order or enquiry.
-                  </li>
+                  <li>Communicating with you about your order or enquiry.</li>
 
                   <li>
                     Handling returns, refunds and eligible customer requests.
                   </li>
 
-                  <li>
-                    Processing eligible custom-order enquiries.
-                  </li>
+                  <li>Processing eligible custom-order enquiries.</li>
 
                   <li>
                     Improving our website, products and customer experience.
@@ -371,12 +359,12 @@ const PrivacyPolicy = () => {
                 </p>
 
                 <p>
-                  Online payments may be processed through third-party
-                  payment service providers. Mehaa Garments does not
-                  intentionally store complete card numbers, UPI credentials,
-                  passwords or other sensitive payment authentication
-                  information when such information is handled directly by
-                  the payment service provider.
+                  Online payments may be processed through third-party payment
+                  service providers. Mehaa Garments does not intentionally store
+                  complete card numbers, UPI credentials, passwords or other
+                  sensitive payment authentication information when such
+                  information is handled directly by the payment service
+                  provider.
                 </p>
 
                 <p>
@@ -422,8 +410,8 @@ const PrivacyPolicy = () => {
                 </p>
 
                 <p>
-                  Customers should avoid sending unnecessary sensitive
-                  personal information through WhatsApp.
+                  Customers should avoid sending unnecessary sensitive personal
+                  information through WhatsApp.
                 </p>
               </div>
             </section>
@@ -442,14 +430,14 @@ const PrivacyPolicy = () => {
               <div className="space-y-5 text-sm sm:text-[15px] text-gray-600 leading-8 mt-6">
                 <p>
                   Our website may use cookies and similar technologies to
-                  support essential website functionality, remember
-                  preferences, improve performance and understand how visitors
-                  interact with our website.
+                  support essential website functionality, remember preferences,
+                  improve performance and understand how visitors interact with
+                  our website.
                 </p>
 
                 <p>
-                  Some cookies may be provided by third-party services used
-                  by our website. Depending on your browser and applicable
+                  Some cookies may be provided by third-party services used by
+                  our website. Depending on your browser and applicable
                   settings, you may be able to manage or restrict cookies.
                 </p>
 
@@ -478,8 +466,7 @@ const PrivacyPolicy = () => {
 
                 <p>
                   We may share information with service providers where
-                  necessary to operate our business and provide services to
-                  you.
+                  necessary to operate our business and provide services to you.
                 </p>
 
                 <p>These may include:</p>
@@ -508,9 +495,7 @@ const PrivacyPolicy = () => {
                 08
               </p>
 
-              <h2 className="font-serif text-3xl sm:text-4xl">
-                Data Security
-              </h2>
+              <h2 className="font-serif text-3xl sm:text-4xl">Data Security</h2>
 
               <div className="space-y-5 text-sm sm:text-[15px] text-gray-600 leading-8 mt-6">
                 <p>
@@ -526,10 +511,10 @@ const PrivacyPolicy = () => {
                 </p>
 
                 <p>
-                  However, no internet transmission or electronic storage
-                  system can be guaranteed to be completely secure. Customers
-                  should also take reasonable precautions to protect their
-                  account credentials and devices.
+                  However, no internet transmission or electronic storage system
+                  can be guaranteed to be completely secure. Customers should
+                  also take reasonable precautions to protect their account
+                  credentials and devices.
                 </p>
               </div>
             </section>
@@ -546,11 +531,11 @@ const PrivacyPolicy = () => {
 
               <div className="space-y-5 text-sm sm:text-[15px] text-gray-600 leading-8 mt-6">
                 <p>
-                  We retain personal information only for as long as
-                  reasonably necessary for the purposes for which it was
-                  collected, including fulfilling orders, providing services,
-                  resolving disputes and meeting applicable legal, tax,
-                  accounting or regulatory requirements.
+                  We retain personal information only for as long as reasonably
+                  necessary for the purposes for which it was collected,
+                  including fulfilling orders, providing services, resolving
+                  disputes and meeting applicable legal, tax, accounting or
+                  regulatory requirements.
                 </p>
 
                 <p>
@@ -586,23 +571,20 @@ const PrivacyPolicy = () => {
                   </li>
 
                   <li>
-                    Correction of inaccurate or incomplete personal
-                    information.
+                    Correction of inaccurate or incomplete personal information.
                   </li>
 
                   <li>
-                    Withdrawal of consent where processing is based on
-                    consent.
+                    Withdrawal of consent where processing is based on consent.
                   </li>
 
                   <li>
-                    Deletion or erasure of personal information where
-                    applicable and legally permissible.
+                    Deletion or erasure of personal information where applicable
+                    and legally permissible.
                   </li>
 
                   <li>
-                    Assistance regarding privacy-related complaints or
-                    concerns.
+                    Assistance regarding privacy-related complaints or concerns.
                   </li>
                 </ul>
 
@@ -637,15 +619,15 @@ const PrivacyPolicy = () => {
                 </p>
 
                 <p>
-                  We do not knowingly seek to collect personal information
-                  from children in circumstances where such collection is not
+                  We do not knowingly seek to collect personal information from
+                  children in circumstances where such collection is not
                   permitted by applicable law.
                 </p>
 
                 <p>
-                  If you believe that a child has provided personal
-                  information to us inappropriately, please contact us so that
-                  we can review the matter and take appropriate action.
+                  If you believe that a child has provided personal information
+                  to us inappropriately, please contact us so that we can review
+                  the matter and take appropriate action.
                 </p>
               </div>
             </section>
@@ -662,14 +644,14 @@ const PrivacyPolicy = () => {
 
               <div className="space-y-5 text-sm sm:text-[15px] text-gray-600 leading-8 mt-6">
                 <p>
-                  We may update this Privacy Policy from time to time to
-                  reflect changes in our services, business practices,
-                  technology or applicable legal requirements.
+                  We may update this Privacy Policy from time to time to reflect
+                  changes in our services, business practices, technology or
+                  applicable legal requirements.
                 </p>
 
                 <p>
-                  When we make changes, the updated version will be published
-                  on this page with a revised "Last updated" date.
+                  When we make changes, the updated version will be published on
+                  this page with a revised "Last updated" date.
                 </p>
 
                 <p>
@@ -680,17 +662,12 @@ const PrivacyPolicy = () => {
             </section>
 
             {/* 13 */}
-            <section
-              id="contact"
-              className="border-t border-gray-200 pt-14"
-            >
+            <section id="contact" className="border-t border-gray-200 pt-14">
               <p className="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4">
                 13
               </p>
 
-              <h2 className="font-serif text-3xl sm:text-4xl">
-                Contact Us
-              </h2>
+              <h2 className="font-serif text-3xl sm:text-4xl">Contact Us</h2>
 
               <div className="space-y-5 text-sm sm:text-[15px] text-gray-600 leading-8 mt-6">
                 <p>
@@ -709,22 +686,24 @@ const PrivacyPolicy = () => {
                         Privacy Contact
                       </p>
 
-                      <p className="font-serif text-xl mt-2">
-                        Mehaa Garments
-                      </p>
+                      <p className="font-serif text-xl mt-2">Mehaa Garments</p>
 
                       <p className="text-sm text-gray-500 leading-7 mt-3">
-                        GST Registered Business Address
+                        No. 48, First Floor,
                         <br />
-                        Tamil Nadu, India
+                        Kalaignar Karunanithi Street,
+                        <br />
+                        Salamedu, Villupuram,
+                        <br />
+                        Tamil Nadu – 605401, India.
                       </p>
 
                       <p className="text-sm text-gray-500 mt-3">
-                        Phone / WhatsApp: +91 99999 99999
+                        Phone / WhatsApp: +91 74185 41436
                       </p>
 
                       <p className="text-sm text-gray-400 mt-2">
-                        Official business email coming soon
+                        Support@mehaagarments.com
                       </p>
                     </div>
                   </div>
@@ -747,8 +726,8 @@ const PrivacyPolicy = () => {
           </h2>
 
           <p className="text-sm text-white/50 leading-7 max-w-xl mx-auto mt-5">
-            Our team is happy to help with privacy-related questions,
-            account information or customer support.
+            Our team is happy to help with privacy-related questions, account
+            information or customer support.
           </p>
 
           <Link
