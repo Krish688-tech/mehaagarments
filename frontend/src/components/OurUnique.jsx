@@ -13,7 +13,7 @@ const uniqueCategories = [
   {
     id: "silk-heritage",
     image:
-      "https://res.cloudinary.com/dkp7rlfq4/image/upload/v1792688760/mehaa_garments_Golden_Portrait_in_Silk_Heritage_xe96pk.webp",
+      "https://res.cloudinary.com/dkp7rlfq4/image/upload/v1792747311/mehaa_garments_Golden_Portrait_in_Silk_Heritage_fqdymt.webp",
     slug: "silk-heritage",
     title: "Silk Heritage",
     description:
@@ -22,7 +22,7 @@ const uniqueCategories = [
   {
     id: "festive-glow",
     image:
-      "https://res.cloudinary.com/dkp7rlfq4/image/upload/v1792688760/mehaa_garments_South_Indian_Festive_Portrait_gdiblo.webp",
+      "https://res.cloudinary.com/dkp7rlfq4/image/upload/v1792747307/mehaa_garments_South_Indian_Festive_Portrait_pez4fz.webp",
     slug: "festive-glow",
     title: "Festive Glow",
     description:
@@ -31,7 +31,7 @@ const uniqueCategories = [
   {
     id: "modern-tradition",
     image:
-      "https://res.cloudinary.com/dkp7rlfq4/image/upload/v1792688759/mehaa_garments_morden_tradition_ny6uid.webp",
+      "https://res.cloudinary.com/dkp7rlfq4/image/upload/v1792747308/mehaa_garments_morden_tradition_weluzj.webp",
     slug: "modern-tradition",
     title: "Modern Tradition",
     description:
@@ -40,7 +40,7 @@ const uniqueCategories = [
   {
     id: "royal-weaves",
     image:
-      "https://res.cloudinary.com/dkp7rlfq4/image/upload/v1792688760/Mehaa_Garments_Royal_weaves_qmtecs.webp",
+      "https://res.cloudinary.com/dkp7rlfq4/image/upload/v1792747308/Mehaa_Garments_Royal_weaves_dr9n8e.jpg",
     slug: "royal-weaves",
     title: "Royal Weaves",
     description:
