@@ -4,7 +4,7 @@ const uniqueCategories = [
   {
     id: "cotton-elegance",
     image:
-      "https://res.cloudinary.com/dkp7rlfq4/image/upload/v1792590401/Mehaa_garments_cotton_elegance_psscuk.jpg",
+      "https://res.cloudinary.com/dkp7rlfq4/image/upload/v1792772201/Mehaa_garments_cotton_elegance_urwbhg.webp",
     slug: "cotton-elegance",
     title: "Cotton Elegance",
     description:
