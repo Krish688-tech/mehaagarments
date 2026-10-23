@@ -10,47 +10,20 @@ const marqueeItems = [
 
 const Hero = () => {
   const imageRef = useRef(null);
-  const titleRef = useRef(null);
-  const subtitleRef = useRef(null);
-  const buttonRef = useRef(null);
   const marqueeTrackRef = useRef(null);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline();
-
-      tl.fromTo(
+      // Keep the cinematic hero image zoom animation.
+      gsap.fromTo(
         imageRef.current,
-        { scale: 1.2 },
-        { scale: 1, duration: 2, ease: "power3.out" },
-      )
-        .fromTo(
-          titleRef.current,
-          { y: 80, opacity: 0 },
-          { y: 0, opacity: 1, duration: 1 },
-          "-=1.5",
-        )
-        .fromTo(
-          subtitleRef.current,
-          { y: 40, opacity: 0 },
-          { y: 0, opacity: 1, duration: 1 },
-          "-=0.8",
-        )
-        .fromTo(
-          buttonRef.current,
-          { scale: 0.8, opacity: 0 },
-          {
-            scale: 1,
-            opacity: 1,
-            duration: 0.8,
-            ease: "back.out(1.7)",
-          },
-          "-=0.6",
-        );
+        { scale: 1.08 },
+        { scale: 1, duration: 1.2, ease: "power2.out" },
+      );
 
-      // Continuous marquee movement
+      // Continuous marquee movement.
       gsap.to(marqueeTrackRef.current, {
         xPercent: -50,
         duration: 28,
@@ -96,19 +69,15 @@ const Hero = () => {
       <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/30 to-transparent" />
       {/* Hero Content */}
       <div className="relative z-10 px-6 text-white">
-        <h1
-          ref={titleRef}
-          className="text-4xl font-bold leading-tight sm:text-5xl md:text-6xl"
-        >
+        <h1 className="text-4xl font-bold leading-tight sm:text-5xl md:text-6xl">
           Elegance in Every Saree
         </h1>
 
-        <p ref={subtitleRef} className="mt-4 text-base sm:text-lg md:text-xl">
+        <p className="mt-4 text-base sm:text-lg md:text-xl">
           Discover timeless tradition with modern style
         </p>
 
         <button
-          ref={buttonRef}
           onClick={() => navigate("/shop")}
           className="mt-8 cursor-pointer rounded-full bg-linear-to-r from-pink-400 via-pink-500 to-pink-600 px-8 py-3 font-medium text-white shadow-lg transition-transform hover:scale-105"
         >
