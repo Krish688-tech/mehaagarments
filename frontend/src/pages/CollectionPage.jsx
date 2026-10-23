@@ -1,124 +1,117 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useSEO from "../hooks/useSEO";
-import { ChevronDown } from "lucide-react";
+import {
+  ChevronDown,
+  ArrowUpDown,
+  SlidersHorizontal,
+  RotateCcw,
+  ArrowRight,
+  X,
+  Sparkles,
+} from "lucide-react";
 import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
+const DEFAULT_MIN_PRICE = 250;
+const DEFAULT_MAX_PRICE = 50000;
+const PAGE_LIMIT = 12;
+
+const SORT_OPTIONS = [
+  { value: "best-selling", label: "Best Selling" },
+  { value: "low-high", label: "Price: Low to High" },
+  { value: "high-low", label: "Price: High to Low" },
+];
+
+const formatPrice = (price) =>
+  `₹${Number(price || 0).toLocaleString("en-IN")}`;
 
 const CollectionPage = () => {
   const { category } = useParams();
   const navigate = useNavigate();
 
-  // =========================================================
-  // PRODUCTS
-  // =========================================================
-
   const [products, setProducts] = useState([]);
-
-  // =========================================================
-  // CATEGORY
-  // =========================================================
-
   const [categoryData, setCategoryData] = useState(null);
   const [uniqueCategoryData, setUniqueCategoryData] = useState(null);
-
-  // =========================================================
-  // UI STATES
-  // =========================================================
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // =========================================================
-  // SORT
-  // =========================================================
-
   const [sortOption, setSortOption] = useState("best-selling");
   const [sortOpen, setSortOpen] = useState(false);
+  const [availabilityOpen, setAvailabilityOpen] = useState(true);
+  const [priceOpen, setPriceOpen] = useState(true);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  // =========================================================
-  // FILTER DROPDOWNS
-  // =========================================================
-
-  const [availabilityOpen, setAvailabilityOpen] = useState(false);
-  const [priceOpen, setPriceOpen] = useState(false);
-
-  // =========================================================
-  // PRICE FILTER
-  // =========================================================
-
-  const [minPrice, setMinPrice] = useState(250);
-  const [maxPrice, setMaxPrice] = useState(50000);
-
-  // Values actually sent to backend
-  const [appliedMinPrice, setAppliedMinPrice] = useState(250);
-  const [appliedMaxPrice, setAppliedMaxPrice] = useState(50000);
-
-  // =========================================================
-  // PAGINATION
-  // =========================================================
+  const [minPrice, setMinPrice] = useState(DEFAULT_MIN_PRICE);
+  const [maxPrice, setMaxPrice] = useState(DEFAULT_MAX_PRICE);
+  const [appliedMinPrice, setAppliedMinPrice] = useState(DEFAULT_MIN_PRICE);
+  const [appliedMaxPrice, setAppliedMaxPrice] = useState(DEFAULT_MAX_PRICE);
 
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({
     totalProducts: 0,
     totalPages: 1,
     currentPage: 1,
-    limit: 12,
+    limit: PAGE_LIMIT,
     hasNextPage: false,
     hasPreviousPage: false,
   });
 
-  // =========================================================
-  // FETCH CATEGORY
-  // =========================================================
-
+  // Fetch standard and curated collection details.
   useEffect(() => {
+    let active = true;
+
     const fetchCollectionData = async () => {
       try {
-        const [categoryResponse, uniqueCategoryResponse] = await Promise.all([
+        const [categoryResponse, uniqueResponse] = await Promise.all([
           axios.get(`${API_URL}/categories`),
           axios.get(`${API_URL}/unique-categories`),
         ]);
+
+        if (!active) return;
 
         const categories = Array.isArray(categoryResponse.data?.categories)
           ? categoryResponse.data.categories
           : [];
 
         const uniqueCategories = Array.isArray(
-          uniqueCategoryResponse.data?.categories,
+          uniqueResponse.data?.categories
         )
-          ? uniqueCategoryResponse.data.categories
-          : Array.isArray(uniqueCategoryResponse.data?.uniqueCategories)
-            ? uniqueCategoryResponse.data.uniqueCategories
+          ? uniqueResponse.data.categories
+          : Array.isArray(uniqueResponse.data?.uniqueCategories)
+            ? uniqueResponse.data.uniqueCategories
             : [];
 
-        const foundCategory = categories.find((item) => item.slug === category);
-
-        const foundUniqueCategory = uniqueCategories.find(
-          (item) => item.slug === category,
+        setCategoryData(
+          categories.find((item) => item.slug === category) || null
         );
 
-        setCategoryData(foundCategory || null);
-        setUniqueCategoryData(foundUniqueCategory || null);
-      } catch (error) {
-        console.error("Failed to fetch collection data:", error);
+        setUniqueCategoryData(
+          uniqueCategories.find((item) => item.slug === category) || null
+        );
+      } catch (err) {
+        console.error("Failed to fetch collection data:", err);
 
-        setCategoryData(null);
-        setUniqueCategoryData(null);
+        if (active) {
+          setCategoryData(null);
+          setUniqueCategoryData(null);
+        }
       }
     };
 
-    if (category) {
-      fetchCollectionData();
-    }
+    if (category) fetchCollectionData();
+
+    return () => {
+      active = false;
+    };
   }, [category]);
 
-  // =========================================================
-  // FETCH PRODUCTS
-  // =========================================================
-
+  // Fetch products with sorting, filtering and pagination.
   useEffect(() => {
+    let active = true;
+
     const fetchProducts = async () => {
       try {
         setLoading(true);
@@ -126,57 +119,52 @@ const CollectionPage = () => {
 
         const params = new URLSearchParams();
 
-        // Collection
-        if (uniqueCategoryData) {
-          params.append("uniqueCategory", category);
-        } else {
-          params.append("category", category);
-        }
-
-        // Sorting
+        params.append(
+          uniqueCategoryData ? "uniqueCategory" : "category",
+          category
+        );
         params.append("sort", sortOption);
-
-        // Pagination
-        params.append("page", page);
-        params.append("limit", 12);
-
-        // Price filtering
-        params.append("minPrice", appliedMinPrice);
-        params.append("maxPrice", appliedMaxPrice);
+        params.append("page", String(page));
+        params.append("limit", String(PAGE_LIMIT));
+        params.append("minPrice", String(appliedMinPrice));
+        params.append("maxPrice", String(appliedMaxPrice));
 
         const { data } = await axios.get(
-          `${API_URL}/products?${params.toString()}`,
+          `${API_URL}/products?${params.toString()}`
         );
 
-        setProducts(data.products || []);
+        if (!active) return;
 
+        setProducts(data.products || []);
         setPagination(
           data.pagination || {
             totalProducts: 0,
             totalPages: 1,
             currentPage: 1,
-            limit: 12,
+            limit: PAGE_LIMIT,
             hasNextPage: false,
             hasPreviousPage: false,
-          },
+          }
         );
-      } catch (error) {
-        console.error("Failed to fetch products:", error);
+      } catch (err) {
+        if (!active) return;
 
+        console.error("Failed to fetch products:", err);
         setProducts([]);
-
         setError(
-          error.response?.data?.message ||
-            "Unable to load products. Please try again.",
+          err.response?.data?.message ||
+            "Unable to load products. Please try again."
         );
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
-    if (category) {
-      fetchProducts();
-    }
+    if (category) fetchProducts();
+
+    return () => {
+      active = false;
+    };
   }, [
     category,
     uniqueCategoryData,
@@ -186,17 +174,9 @@ const CollectionPage = () => {
     appliedMaxPrice,
   ]);
 
-  // =========================================================
-  // CATEGORY CHANGE
-  // =========================================================
-
   useEffect(() => {
     setPage(1);
   }, [category]);
-
-  // =========================================================
-  // SORT CHANGE
-  // =========================================================
 
   const handleSortChange = (value) => {
     setSortOption(value);
@@ -204,56 +184,37 @@ const CollectionPage = () => {
     setPage(1);
   };
 
-  // =========================================================
-  // PRICE FILTER
-  // =========================================================
-
   const applyPriceFilter = () => {
     let min = Number(minPrice);
     let max = Number(maxPrice);
 
-    if (Number.isNaN(min)) {
-      min = 250;
-    }
+    if (!Number.isFinite(min)) min = DEFAULT_MIN_PRICE;
+    if (!Number.isFinite(max)) max = DEFAULT_MAX_PRICE;
 
-    if (Number.isNaN(max)) {
-      max = 50000;
-    }
-
-    if (min < 0) {
-      min = 0;
-    }
-
-    if (max < min) {
-      max = min;
-    }
+    min = Math.max(0, min);
+    max = Math.max(min, max);
 
     setMinPrice(min);
     setMaxPrice(max);
-
     setAppliedMinPrice(min);
     setAppliedMaxPrice(max);
-
     setPage(1);
+    setMobileFiltersOpen(false);
   };
-
-  // =========================================================
-  // CLEAR PRICE FILTER
-  // =========================================================
 
   const clearPriceFilter = () => {
-    setMinPrice(250);
-    setMaxPrice(50000);
-
-    setAppliedMinPrice(250);
-    setAppliedMaxPrice(50000);
-
+    setMinPrice(DEFAULT_MIN_PRICE);
+    setMaxPrice(DEFAULT_MAX_PRICE);
+    setAppliedMinPrice(DEFAULT_MIN_PRICE);
+    setAppliedMaxPrice(DEFAULT_MAX_PRICE);
     setPage(1);
   };
 
-  // =========================================================
-  // CATEGORY TITLE
-  // =========================================================
+  const clearAllFilters = () => {
+    clearPriceFilter();
+    setSortOption("best-selling");
+    setPage(1);
+  };
 
   const collectionData = uniqueCategoryData || categoryData;
 
@@ -265,10 +226,8 @@ const CollectionPage = () => {
       .join(" ")} Sarees`;
 
   const seoTitle = (() => {
-    const name = collectionData?.name || categoryTitle;
-
     if (uniqueCategoryData) {
-      const uniqueSeoTitles = {
+      const titles = {
         "cotton-elegance": "Cotton Saree Collection",
         "silk-heritage": "Silk Saree Collection",
         "festive-glow": "Festive Saree Collection",
@@ -276,30 +235,26 @@ const CollectionPage = () => {
         "royal-weaves": "Premium Saree Collection",
       };
 
-      const title = uniqueSeoTitles[category];
-
-      return title
-        ? `${title} | Mehaa Garments`
-        : `${name} | Saree Collection | Mehaa Garments`;
+      return titles[category]
+        ? `${titles[category]} | Mehaa Garments`
+        : `${categoryTitle} | Saree Collection | Mehaa Garments`;
     }
 
-    const categorySeoTitles = {
+    const titles = {
       "cotton-sarees": "Buy Cotton Sarees Online",
       "silk-sarees": "Shop Silk Sarees Online",
       "designer-sarees": "Shop Designer Sarees Online",
       "daily-wear": "Daily Wear Sarees Online",
     };
 
-    const title = categorySeoTitles[category];
-
-    return title
-      ? `${title} | Mehaa Garments`
-      : `${name} | Shop Sarees Online | Mehaa Garments`;
+    return titles[category]
+      ? `${titles[category]} | Mehaa Garments`
+      : `${categoryTitle} | Shop Sarees Online | Mehaa Garments`;
   })();
 
   const seoDescription = uniqueCategoryData
-    ? `Explore the ${collectionData?.name || categoryTitle} collection at Mehaa Garments. Discover beautiful sarees for celebrations, traditional occasions and everyday elegance.`
-    : `Explore ${collectionData?.name || categoryTitle} at Mehaa Garments. Shop sarees online and discover beautiful styles for everyday wear, celebrations and special occasions.`;
+    ? `Explore the ${categoryTitle} collection at Mehaa Garments. Discover beautiful sarees for celebrations, traditional occasions and everyday elegance.`
+    : `Explore ${categoryTitle} at Mehaa Garments. Shop sarees online and discover beautiful styles for everyday wear, celebrations and special occasions.`;
 
   useSEO({
     title: seoTitle,
@@ -307,557 +262,618 @@ const CollectionPage = () => {
     canonicalUrl: `https://www.mehaagarments.in/collections/${category}`,
   });
 
-  // =========================================================
-  // CATEGORY IMAGE
-  // =========================================================
-
   const categoryImage =
     collectionData?.image ||
     "https://images.unsplash.com/photo-1610030469983-98e550d6193c";
 
-  // =========================================================
-  // RENDER
-  // =========================================================
+  const priceFilterActive =
+    appliedMinPrice !== DEFAULT_MIN_PRICE ||
+    appliedMaxPrice !== DEFAULT_MAX_PRICE;
+
+  const selectedSort =
+    SORT_OPTIONS.find((option) => option.value === sortOption)?.label ||
+    "Best Selling";
+
+  const openProduct = (id) =>
+    navigate(`/collection/${category}/specification/${id}`);
+
+  const scrollToProducts = () => {
+    document.getElementById("collection-products")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
+
+  // Shared filter content for desktop and mobile.
+  const renderFilters = () => (
+    <div className="space-y-0">
+      <div className="border-b border-[#e9e1d6] py-5">
+        <button
+          type="button"
+          onClick={() => setAvailabilityOpen(!availabilityOpen)}
+          className="flex w-full items-center justify-between gap-4 text-left"
+          aria-expanded={availabilityOpen}
+        >
+          <span className="text-[13px] font-medium uppercase tracking-[1.5px]">
+            Availability
+          </span>
+          <ChevronDown
+            size={17}
+            className={`transition-transform duration-300 ${
+              availabilityOpen ? "rotate-180" : ""
+            }`}
+          />
+        </button>
+
+        {availabilityOpen && (
+          <p className="mt-4 text-sm text-[#777168]">
+            {pagination.totalProducts}{" "}
+            {pagination.totalProducts === 1 ? "piece" : "pieces"} in this
+            collection
+          </p>
+        )}
+      </div>
+
+      <div className="py-5">
+        <button
+          type="button"
+          onClick={() => setPriceOpen(!priceOpen)}
+          className="flex w-full items-center justify-between gap-4 text-left"
+          aria-expanded={priceOpen}
+        >
+          <span className="text-[13px] font-medium uppercase tracking-[1.5px]">
+            Price range
+          </span>
+          <ChevronDown
+            size={17}
+            className={`transition-transform duration-300 ${
+              priceOpen ? "rotate-180" : ""
+            }`}
+          />
+        </button>
+
+        {priceOpen && (
+          <div className="mt-5">
+            <div className="flex items-center justify-between gap-3 text-xs text-[#777168]">
+              <span>{formatPrice(minPrice)}</span>
+              <span>{formatPrice(maxPrice)}</span>
+            </div>
+
+            <input
+              aria-label="Maximum price"
+              type="range"
+              min={250}
+              max={50000}
+              step={250}
+              value={Math.min(50000, Math.max(250, maxPrice))}
+              onChange={(event) =>
+                setMaxPrice(Math.max(minPrice, Number(event.target.value)))
+              }
+              className="mt-3 w-full cursor-pointer accent-[#356b55]"
+            />
+
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <label className="block">
+                <span className="mb-2 block text-[11px] uppercase tracking-wider text-[#8a8378]">
+                  Minimum
+                </span>
+                <input
+                  type="number"
+                  min="0"
+                  value={minPrice}
+                  onChange={(event) =>
+                    setMinPrice(
+                      event.target.value === ""
+                        ? ""
+                        : Number(event.target.value)
+                    )
+                  }
+                  className="w-full rounded-xl border border-[#e5ded3] bg-[#fffdfa] px-3 py-3 text-sm outline-none transition focus:border-[#356b55]"
+                  placeholder="₹250"
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-2 block text-[11px] uppercase tracking-wider text-[#8a8378]">
+                  Maximum
+                </span>
+                <input
+                  type="number"
+                  min="0"
+                  value={maxPrice}
+                  onChange={(event) =>
+                    setMaxPrice(
+                      event.target.value === ""
+                        ? ""
+                        : Number(event.target.value)
+                    )
+                  }
+                  className="w-full rounded-xl border border-[#e5ded3] bg-[#fffdfa] px-3 py-3 text-sm outline-none transition focus:border-[#356b55]"
+                  placeholder="₹50,000"
+                />
+              </label>
+            </div>
+
+            <button
+              type="button"
+              onClick={applyPriceFilter}
+              className="mt-5 w-full rounded-full bg-[#244a3a] px-5 py-3.5 text-xs font-medium uppercase tracking-[1.5px] text-white transition-colors hover:bg-[#18382b]"
+            >
+              Apply price
+            </button>
+
+            {priceFilterActive && (
+              <button
+                type="button"
+                onClick={clearPriceFilter}
+                className="mt-3 flex w-full items-center justify-center gap-2 py-2 text-xs text-[#777168] transition hover:text-[#244a3a]"
+              >
+                <RotateCcw size={13} />
+                Reset price
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  const renderProductCard = (item) => {
+    const discount =
+      item.oldPrice > item.price
+        ? Math.round(
+            ((item.oldPrice - item.price) / item.oldPrice) * 100
+          )
+        : 0;
+
+    return (
+      <article
+        key={item._id}
+        role="link"
+        tabIndex={0}
+        aria-label={`View ${item.name}`}
+        onClick={() => openProduct(item._id)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openProduct(item._id);
+          }
+        }}
+        className="group min-w-0 cursor-pointer outline-none"
+      >
+        <div className="relative aspect-3/4 overflow-hidden bg-[#eee8de]">
+          <img
+            src={item.image}
+            alt={item.name}
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.045]"
+          />
+
+          {discount > 0 && (
+            <span className="absolute left-2 top-2 bg-[#f8f3eb] px-2 py-1 text-[9px] font-medium uppercase tracking-[1px] text-[#356b55] sm:left-3 sm:top-3 sm:px-3 sm:py-1.5 sm:text-[10px]">
+              {discount}% off
+            </span>
+          )}
+
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              openProduct(item._id);
+            }}
+            className="absolute bottom-0 left-0 right-0 hidden translate-y-full bg-[#f8f3eb]/95 px-4 py-4 text-center text-[10px] font-medium uppercase tracking-[2px] text-[#263b30] backdrop-blur-sm transition-transform duration-300 group-hover:translate-y-0 md:block"
+          >
+            Explore saree <ArrowRight size={14} className="ml-2 inline" />
+          </button>
+        </div>
+
+        <div className="pt-3 sm:pt-4">
+          <h3 className="line-clamp-2 font-serif text-[14px] leading-snug text-[#292821] sm:text-[17px]">
+            {item.name}
+          </h3>
+
+          <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="text-[15px] font-medium text-[#356b55] sm:text-[17px]">
+              {formatPrice(item.price)}
+            </span>
+
+            {item.oldPrice > item.price && (
+              <span className="text-[11px] text-[#9b948a] line-through sm:text-[13px]">
+                {formatPrice(item.oldPrice)}
+              </span>
+            )}
+          </div>
+
+          {discount > 0 && (
+            <p className="mt-1 text-[10px] text-[#8a8378] sm:text-[11px]">
+              You save {formatPrice(item.oldPrice - item.price)}
+            </p>
+          )}
+        </div>
+      </article>
+    );
+  };
 
   return (
-    <div className="bg-[#f8f8f8] min-h-screen">
-      {/* =====================================================
-          HERO
-      ===================================================== */}
-
-      <section className="relative w-full h-[50vh] overflow-hidden">
+    <main className="min-h-screen bg-[#faf8f4] text-[#292821]">
+      {/* COLLECTION HERO */}
+      <section className="relative isolate flex min-h-97.5 h-[52svh] max-h-170 items-center justify-center overflow-hidden sm:min-h-112.5">
         <img
           src={categoryImage}
           alt={categoryTitle}
-          className="w-full h-full object-cover scale-105"
+          fetchPriority="high"
+          decoding="async"
+          className="absolute inset-0 -z-20 h-full w-full object-cover"
         />
 
-        <div className="absolute inset-0 bg-black/45"></div>
+        <div className="absolute inset-0 -z-10 bg-linear-to-b from-black/35 via-black/35 to-black/60" />
 
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white px-6">
-          <p className="uppercase tracking-[8px] text-sm opacity-80">
-            Mehaa Garments
-          </p>
+        <div className="mx-auto max-w-4xl px-5 py-12 text-center text-white sm:px-8">
+          <div className="mb-5 flex items-center justify-center gap-3">
+            <span className="h-px w-7 bg-[#d8c3a0]" />
+            <p className="text-[10px] font-medium uppercase tracking-[4px] text-white/90 sm:text-xs sm:tracking-[6px]">
+              MEHAA GARMENTS
+            </p>
+            <span className="h-px w-7 bg-[#d8c3a0]" />
+          </div>
 
-          <h1 className="playfair text-5xl md:text-7xl font-semibold mt-5">
+          <h1 className="font-serif text-4xl font-normal leading-[1.12] tracking-tight sm:text-6xl md:text-7xl">
             {categoryTitle}
           </h1>
 
-          <p className="mt-6 max-w-2xl text-lg md:text-xl opacity-90 leading-relaxed">
-            {categoryData?.description ||
-              "Elegant handcrafted sarees designed for timeless beauty and modern sophistication."}
+          <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-white/85 sm:mt-6 sm:text-base sm:leading-8">
+            {collectionData?.description ||
+              "Discover timeless drapes, beautiful details and effortless Indian elegance."}
           </p>
 
           <button
-            onClick={() => {
-              window.scrollTo({
-                top: window.innerHeight,
-                behavior: "smooth",
-              });
-            }}
-            className="mt-10 px-8 py-4 bg-white text-black rounded-full font-medium hover:bg-black hover:text-white transition-all duration-500"
+            type="button"
+            onClick={scrollToProducts}
+            className="mt-7 inline-flex items-center gap-3 border border-white/75 px-6 py-3.5 text-[10px] font-medium uppercase tracking-[2px] transition-all duration-300 hover:border-[#f3e3c6] hover:bg-[#f3e3c6] hover:text-[#263b30] sm:mt-9 sm:px-8 sm:py-4"
           >
-            Explore Collection
+            Discover the collection
+            <ArrowRight size={15} />
           </button>
+        </div>
+
+        <div className="absolute bottom-5 left-1/2 hidden -translate-x-1/2 items-center gap-3 text-[9px] uppercase tracking-[3px] text-white/70 sm:flex">
+          <Sparkles size={12} />
+          Timeless by tradition
         </div>
       </section>
 
-      {/* =====================================================
-          MAIN SECTION
-      ===================================================== */}
+      {/* COLLECTION CONTENT */}
+      <section
+        id="collection-products"
+        className="mx-auto max-w-400 scroll-mt-5 px-3 py-8 sm:px-6 sm:py-12 lg:px-10 lg:py-16"
+      >
+        {/* Collection heading */}
+        <div className="mb-7 border-b border-[#e9e1d6] pb-6 sm:mb-9 sm:pb-8">
+          <p className="mb-2 text-[9px] uppercase tracking-[3px] text-[#8a8378] sm:text-[10px]">
+            THE MEHAA COLLECTION JOURNAL
+          </p>
 
-      <div className="max-w-400 mx-auto px-4 md:px-10 lg:px-14 py-10 md:py-16">
-        <div className="flex flex-col lg:flex-row gap-10 lg:gap-16">
-          {/* =================================================
-              FILTER SIDEBAR
-          ================================================= */}
-
-          <div className="w-full lg:w-[320px]">
-            <div
-              className="sticky top-28 bg-white/70 backdrop-blur-2xl
-              border border-white/40 rounded-4xl
-              shadow-xl p-6 md:p-8"
-            >
-              <h2 className="playfair text-3xl mb-8 text-black">Filters</h2>
-
-              {/* =================================================
-                  AVAILABILITY
-              ================================================= */}
-
-              <div className="border-b border-gray-200 pb-6 mb-6">
-                <button
-                  onClick={() => setAvailabilityOpen(!availabilityOpen)}
-                  className="w-full flex justify-between items-center"
-                >
-                  <h3 className="text-lg font-medium">Availability</h3>
-
-                  <ChevronDown
-                    size={18}
-                    className={`transition duration-300 ${
-                      availabilityOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-
-                <div
-                  className={`overflow-hidden transition-all duration-500 ${
-                    availabilityOpen
-                      ? "max-h-40 opacity-100 mt-5"
-                      : "max-h-0 opacity-0"
-                  }`}
-                >
-                  <div className="text-gray-600 text-[15px]">
-                    {pagination.totalProducts} products available
-                  </div>
-                </div>
-              </div>
-
-              {/* =================================================
-                  PRICE
-              ================================================= */}
-
-              <div>
-                <button
-                  onClick={() => setPriceOpen(!priceOpen)}
-                  className="w-full flex justify-between items-center"
-                >
-                  <h3 className="text-lg font-medium">Price</h3>
-
-                  <ChevronDown
-                    size={18}
-                    className={`transition duration-300 ${
-                      priceOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-
-                <div
-                  className={`overflow-hidden transition-all duration-500 ${
-                    priceOpen
-                      ? "max-h-125 opacity-100 mt-6"
-                      : "max-h-0 opacity-0"
-                  }`}
-                >
-                  {/* RANGE */}
-
-                  <input
-                    type="range"
-                    min="250"
-                    max="50000"
-                    value={maxPrice}
-                    onChange={(e) => setMaxPrice(Number(e.target.value))}
-                    className="w-full accent-black cursor-pointer"
-                  />
-
-                  <div className="flex justify-between text-sm text-gray-500 mt-4">
-                    <span>₹250</span>
-
-                    <span>₹{maxPrice}</span>
-                  </div>
-
-                  {/* INPUTS */}
-
-                  <div className="flex gap-3 mt-6">
-                    <input
-                      type="number"
-                      min="0"
-                      value={minPrice}
-                      onChange={(e) => setMinPrice(Number(e.target.value))}
-                      className="w-1/2 rounded-2xl border border-gray-200
-                      px-4 py-3 outline-none bg-white/70"
-                      placeholder="Min"
-                    />
-
-                    <input
-                      type="number"
-                      min="0"
-                      value={maxPrice}
-                      onChange={(e) => setMaxPrice(Number(e.target.value))}
-                      className="w-1/2 rounded-2xl border border-gray-200
-                      px-4 py-3 outline-none bg-white/70"
-                      placeholder="Max"
-                    />
-                  </div>
-
-                  {/* APPLY */}
-
-                  <button
-                    onClick={applyPriceFilter}
-                    className="w-full mt-6 bg-black text-white
-                    py-4 rounded-full hover:scale-[1.02]
-                    transition duration-300"
-                  >
-                    Apply Filters
-                  </button>
-
-                  {/* CLEAR */}
-
-                  {(appliedMinPrice !== 250 || appliedMaxPrice !== 50000) && (
-                    <button
-                      onClick={clearPriceFilter}
-                      className="w-full mt-3 py-3 text-sm
-                      text-gray-500 hover:text-black transition"
-                    >
-                      Clear Price Filter
-                    </button>
-                  )}
-                </div>
-              </div>
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+            <div>
+              <h2 className="font-serif text-3xl font-normal leading-tight sm:text-4xl">
+                Explore the edit
+              </h2>
+              <p className="mt-2 text-xs leading-6 text-[#827b70] sm:text-sm">
+                Thoughtfully chosen sarees for every beautiful occasion.
+              </p>
             </div>
+
+            <span className="hidden text-[10px] uppercase tracking-[2px] text-[#827b70] lg:block">
+              A little tradition, a lot of elegance
+            </span>
           </div>
+        </div>
 
-          {/* =================================================
-              PRODUCTS SECTION
-          ================================================= */}
+        {/* Mobile filter / sort toolbar */}
+        <div className="mb-6 flex items-center justify-between gap-3 border-y border-[#e9e1d6] py-3 md:hidden">
+          <button
+            type="button"
+            onClick={() => setMobileFiltersOpen(true)}
+            className="inline-flex items-center gap-2 py-2 text-[10px] font-medium uppercase tracking-[1.5px]"
+          >
+            <SlidersHorizontal size={15} />
+            Filters
+            {priceFilterActive && (
+              <span className="h-1.5 w-1.5 rounded-full bg-[#356b55]" />
+            )}
+          </button>
 
-          <div className="flex-1">
-            {/* =================================================
-                TOP BAR
-            ================================================= */}
+          <span className="text-[11px] text-[#827b70]">
+            {loading ? "Loading..." : `${pagination.totalProducts} sarees`}
+          </span>
 
-            <div
-              className="flex flex-col md:flex-row md:items-center
-              justify-between gap-5 mb-10"
-            >
-              <p className="text-gray-500 text-lg">
+          <button
+            type="button"
+            onClick={() => setSortOpen(!sortOpen)}
+            className="inline-flex items-center gap-2 py-2 text-[10px] font-medium uppercase tracking-[1.2px]"
+          >
+            <ArrowUpDown size={14} />
+            Sort
+          </button>
+        </div>
+
+        {/* Mobile sort menu */}
+        {sortOpen && (
+          <div className="relative z-20 mb-5 -mt-3 border border-[#e9e1d6] bg-white p-2 shadow-lg md:hidden">
+            {SORT_OPTIONS.map((option) => (
+              <button
+                type="button"
+                key={option.value}
+                onClick={() => handleSortChange(option.value)}
+                className={`flex w-full items-center justify-between px-4 py-3 text-left text-xs ${
+                  sortOption === option.value
+                    ? "bg-[#f3f0e8] text-[#356b55]"
+                    : "text-[#555047]"
+                }`}
+              >
+                {option.label}
+                {sortOption === option.value && (
+                  <span className="text-[10px]">Selected</span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-[220px_minmax(0,1fr)] md:gap-7 lg:grid-cols-[250px_minmax(0,1fr)] lg:gap-10">
+          {/* Desktop sidebar */}
+          <aside className="hidden md:block">
+            <div className="sticky top-24 border border-[#e9e1d6] bg-[#fffdfa] px-5 py-6 lg:px-6">
+              <div className="flex items-center justify-between border-b border-[#e9e1d6] pb-5">
+                <h2 className="font-serif text-2xl">Refine</h2>
+                <SlidersHorizontal size={17} strokeWidth={1.4} />
+              </div>
+
+              {renderFilters()}
+
+              {priceFilterActive && (
+                <button
+                  type="button"
+                  onClick={clearAllFilters}
+                  className="mt-2 flex items-center gap-2 text-[10px] uppercase tracking-[1.3px] text-[#827b70] hover:text-[#356b55]"
+                >
+                  <RotateCcw size={12} />
+                  Clear all filters
+                </button>
+              )}
+            </div>
+          </aside>
+
+          {/* Products */}
+          <div className="min-w-0">
+            <div className="mb-6 hidden items-center justify-between border-b border-[#e9e1d6] pb-4 md:flex">
+              <p className="text-xs text-[#827b70]">
                 {loading
-                  ? "Loading products..."
-                  : `${pagination.totalProducts} products`}
+                  ? "Curating your collection..."
+                  : `Showing ${products.length} of ${pagination.totalProducts} sarees`}
               </p>
 
-              {/* SORT */}
-
-              <div className="relative w-full md:w-auto">
+              <div className="relative">
                 <button
+                  type="button"
                   onClick={() => setSortOpen(!sortOpen)}
-                  className="w-full md:w-auto flex items-center justify-between
-                  gap-4 px-6 py-4 rounded-full bg-white/70
-                  backdrop-blur-xl border border-white/40 shadow-lg"
+                  className="flex min-w-51.25 items-center justify-between gap-4 border border-[#e9e1d6] bg-[#fffdfa] px-4 py-3 text-xs transition hover:border-[#b9c9bb]"
+                  aria-expanded={sortOpen}
                 >
                   <span>
-                    {sortOption === "best-selling" && "Best Selling"}
-
-                    {sortOption === "low-high" && "Price: Low to High"}
-
-                    {sortOption === "high-low" && "Price: High to Low"}
+                    <span className="text-[#827b70]">Sort: </span>
+                    {selectedSort}
                   </span>
-
                   <ChevronDown
-                    size={18}
-                    className={`transition duration-300 ${
+                    size={15}
+                    className={`transition-transform ${
                       sortOpen ? "rotate-180" : ""
                     }`}
                   />
                 </button>
 
-                <div
-                  className={`absolute right-0 mt-4 w-full md:w-64
-                  rounded-3xl bg-white/70 backdrop-blur-2xl
-                  border border-white/40 shadow-2xl overflow-hidden
-                  transition-all duration-300 z-50 ${
-                    sortOpen
-                      ? "opacity-100 scale-100"
-                      : "opacity-0 scale-95 pointer-events-none"
-                  }`}
-                >
-                  <button
-                    onClick={() => handleSortChange("best-selling")}
-                    className="w-full px-6 py-4 text-left hover:bg-white/50"
-                  >
-                    Best Selling
-                  </button>
-
-                  <button
-                    onClick={() => handleSortChange("low-high")}
-                    className="w-full px-6 py-4 text-left hover:bg-white/50"
-                  >
-                    Price: Low to High
-                  </button>
-
-                  <button
-                    onClick={() => handleSortChange("high-low")}
-                    className="w-full px-6 py-4 text-left hover:bg-white/50"
-                  >
-                    Price: High to Low
-                  </button>
-                </div>
+                {sortOpen && (
+                  <div className="absolute right-0 top-full z-30 mt-2 w-full border border-[#e9e1d6] bg-[#fffdfa] p-1 shadow-xl">
+                    {SORT_OPTIONS.map((option) => (
+                      <button
+                        type="button"
+                        key={option.value}
+                        onClick={() => handleSortChange(option.value)}
+                        className={`w-full px-4 py-3 text-left text-xs transition ${
+                          sortOption === option.value
+                            ? "bg-[#f1eee6] text-[#356b55]"
+                            : "hover:bg-[#f8f5ef]"
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* =================================================
-                LOADING
-            ================================================= */}
-
+            {/* Loading skeletons */}
             {loading && (
-              <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
-                {Array.from({ length: 6 }).map((_, index) => (
-                  <div key={index} className="animate-pulse">
-                    <div className="w-full h-120 bg-gray-200 rounded-4xl"></div>
-
-                    <div className="mt-5 space-y-3">
-                      <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-
-                      <div className="h-5 bg-gray-200 rounded w-1/3"></div>
-                    </div>
+              <div className="grid grid-cols-2 gap-x-3 gap-y-8 sm:gap-x-5 sm:gap-y-10 xl:grid-cols-3 xl:gap-x-7">
+                {Array.from({ length: PAGE_LIMIT }).map((_, index) => (
+                  <div key={index} className="min-w-0 animate-pulse">
+                    <div className="aspect-3/4 bg-[#ece6dc]" />
+                    <div className="mt-4 h-4 w-4/5 bg-[#ece6dc]" />
+                    <div className="mt-3 h-4 w-2/5 bg-[#ece6dc]" />
                   </div>
                 ))}
               </div>
             )}
 
-            {/* =================================================
-                ERROR
-            ================================================= */}
-
+            {/* Error state */}
             {!loading && error && (
-              <div className="py-20 text-center">
-                <h2 className="text-2xl font-medium text-black">
-                  Something went wrong
-                </h2>
-
-                <p className="mt-3 text-gray-500">{error}</p>
-
-                <button
-                  onClick={() => window.location.reload()}
-                  className="mt-6 px-6 py-3 rounded-full bg-black text-white"
-                >
-                  Try Again
-                </button>
-              </div>
-            )}
-
-            {/* =================================================
-                EMPTY
-            ================================================= */}
-
-            {!loading && !error && products.length === 0 && (
-              <div className="py-20 text-center">
-                <h2 className="playfair text-3xl text-black">
-                  No Sarees Found
-                </h2>
-
-                <p className="mt-4 text-gray-500">
-                  No products are available in this collection with the selected
-                  filters.
+              <div className="border border-[#e9e1d6] bg-[#fffdfa] px-5 py-20 text-center">
+                <h2 className="font-serif text-3xl">A little pause</h2>
+                <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-[#827b70]">
+                  {error}
                 </p>
-
                 <button
-                  onClick={clearPriceFilter}
-                  className="mt-6 px-7 py-3 rounded-full bg-black text-white"
+                  type="button"
+                  onClick={() => window.location.reload()}
+                  className="mt-7 bg-[#244a3a] px-7 py-3.5 text-[10px] uppercase tracking-[2px] text-white transition hover:bg-[#18382b]"
                 >
-                  Clear Filters
+                  Try again
                 </button>
               </div>
             )}
 
-            {/* =================================================
-                MOBILE PRODUCTS
-            ================================================= */}
-
-            {!loading && !error && products.length > 0 && (
-              <div className="flex flex-col gap-8 md:hidden">
-                {products.map((item) => {
-                  const discount =
-                    item.oldPrice > item.price
-                      ? Math.round(
-                          ((item.oldPrice - item.price) / item.oldPrice) * 100,
-                        )
-                      : 0;
-
-                  return (
-                    <div
-                      key={item._id}
-                      onClick={() =>
-                        navigate(
-                          `/collection/${category}/specification/${item._id}`,
-                        )
-                      }
-                      className="group bg-white rounded-4xl
-                        overflow-hidden shadow-lg cursor-pointer"
-                    >
-                      <div className="relative overflow-hidden">
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="w-full h-125 object-cover
-                            transition duration-700 group-hover:scale-105"
-                        />
-
-                        {discount > 0 && (
-                          <div
-                            className="absolute top-5 left-5
-                              bg-red-600 text-white text-xs
-                              px-4 py-2 rounded-full"
-                          >
-                            SAVE {discount}%
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="p-6">
-                        <h3 className="playfair text-2xl text-black leading-snug">
-                          {item.name}
-                        </h3>
-
-                        <div className="flex items-center gap-3 mt-4">
-                          <span className="text-2xl text-red-600 font-medium">
-                            ₹{item.price}
-                          </span>
-
-                          {item.oldPrice > item.price && (
-                            <span className="line-through text-gray-400">
-                              ₹{item.oldPrice}
-                            </span>
-                          )}
-                        </div>
-
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-
-                            navigate(
-                              `/collection/${category}/specification/${item._id}`,
-                            );
-                          }}
-                          className="mt-6 w-full py-4 rounded-full bg-black text-white"
-                        >
-                          View Product
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* =================================================
-                DESKTOP PRODUCTS
-            ================================================= */}
-
-            {!loading && !error && products.length > 0 && (
-              <div className="hidden md:grid md:grid-cols-2 xl:grid-cols-3 gap-8">
-                {products.map((item) => {
-                  const discount =
-                    item.oldPrice > item.price
-                      ? Math.round(
-                          ((item.oldPrice - item.price) / item.oldPrice) * 100,
-                        )
-                      : 0;
-
-                  return (
-                    <div
-                      key={item._id}
-                      onClick={() =>
-                        navigate(
-                          `/collection/${category}/specification/${item._id}`,
-                        )
-                      }
-                      className="group cursor-pointer
-                        transition-all duration-500
-                        hover:-translate-y-2"
-                    >
-                      <div
-                        className="relative overflow-hidden
-                          rounded-4xl bg-white shadow-sm
-                          hover:shadow-2xl
-                          transition-all duration-500"
-                      >
-                        {discount > 0 && (
-                          <div
-                            className="absolute top-5 left-5 z-10
-                              bg-red-600 text-white text-xs
-                              px-4 py-2 rounded-full"
-                          >
-                            SAVE {discount}%
-                          </div>
-                        )}
-
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="w-full h-120 object-cover
-                            transition-transform duration-700
-                            group-hover:scale-110"
-                        />
-                      </div>
-
-                      <div className="mt-5 px-1">
-                        <h3 className="playfair text-2xl text-gray-800">
-                          {item.name}
-                        </h3>
-
-                        <div className="flex items-center gap-3 mt-4">
-                          <span className="text-red-600 text-2xl font-medium">
-                            ₹{item.price}
-                          </span>
-
-                          {item.oldPrice > item.price && (
-                            <span className="line-through text-gray-400">
-                              ₹{item.oldPrice}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* =================================================
-                PAGINATION
-            ================================================= */}
-
-            {!loading && !error && pagination.totalPages > 1 && (
-              <div className="flex items-center justify-center gap-3 mt-16">
+            {/* Empty state */}
+            {!loading && !error && products.length === 0 && (
+              <div className="border border-[#e9e1d6] bg-[#fffdfa] px-5 py-20 text-center">
+                <Sparkles
+                  size={25}
+                  strokeWidth={1.2}
+                  className="mx-auto text-[#8a9b82]"
+                />
+                <h2 className="mt-5 font-serif text-3xl">
+                  Nothing in this edit just yet
+                </h2>
+                <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-[#827b70]">
+                  Try adjusting your price range to discover more beautiful
+                  sarees in this collection.
+                </p>
                 <button
+                  type="button"
+                  onClick={clearAllFilters}
+                  className="mt-7 bg-[#244a3a] px-7 py-3.5 text-[10px] uppercase tracking-[2px] text-white transition hover:bg-[#18382b]"
+                >
+                  Reset filters
+                </button>
+              </div>
+            )}
+
+            {/* Responsive product grid */}
+            {!loading && !error && products.length > 0 && (
+              <div className="grid grid-cols-2 gap-x-3 gap-y-8 sm:gap-x-5 sm:gap-y-10 xl:grid-cols-3 xl:gap-x-7">
+                {products.map((item) => renderProductCard(item))}
+              </div>
+            )}
+
+            {/* Pagination */}
+            {!loading && !error && pagination.totalPages > 1 && (
+              <nav
+                aria-label="Collection pagination"
+                className="mt-12 flex items-center justify-center gap-4 border-t border-[#e9e1d6] pt-7 sm:mt-16 sm:gap-6"
+              >
+                <button
+                  type="button"
                   disabled={!pagination.hasPreviousPage}
                   onClick={() => {
                     setPage((previous) => Math.max(previous - 1, 1));
-
-                    window.scrollTo({
-                      top: 0,
-                      behavior: "smooth",
-                    });
+                    document
+                      .getElementById("collection-products")
+                      ?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                      });
                   }}
-                  className="px-5 py-3 rounded-full border
-                    border-gray-300 disabled:opacity-30
-                    disabled:cursor-not-allowed
-                    hover:bg-black hover:text-white
-                    transition"
+                  className="border border-[#dcd5ca] px-4 py-3 text-[9px] uppercase tracking-[1px] transition hover:bg-[#244a3a] hover:text-white disabled:cursor-not-allowed disabled:opacity-35 sm:px-6 sm:text-[10px]"
                 >
                   Previous
                 </button>
 
-                <div className="px-5 py-3 rounded-full bg-black text-white">
-                  {pagination.currentPage} / {pagination.totalPages}
-                </div>
+                <span className="font-serif text-lg text-[#356b55]">
+                  {pagination.currentPage}
+                  <span className="mx-2 text-[#aaa195]">/</span>
+                  {pagination.totalPages}
+                </span>
 
                 <button
+                  type="button"
                   disabled={!pagination.hasNextPage}
                   onClick={() => {
                     setPage((previous) =>
-                      Math.min(previous + 1, pagination.totalPages),
+                      Math.min(previous + 1, pagination.totalPages)
                     );
-
-                    window.scrollTo({
-                      top: 0,
-                      behavior: "smooth",
-                    });
+                    document
+                      .getElementById("collection-products")
+                      ?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                      });
                   }}
-                  className="px-5 py-3 rounded-full border
-                    border-gray-300 disabled:opacity-30
-                    disabled:cursor-not-allowed
-                    hover:bg-black hover:text-white
-                    transition"
+                  className="border border-[#dcd5ca] px-4 py-3 text-[9px] uppercase tracking-[1px] transition hover:bg-[#244a3a] hover:text-white disabled:cursor-not-allowed disabled:opacity-35 sm:px-6 sm:text-[10px]"
                 >
                   Next
                 </button>
-              </div>
+              </nav>
             )}
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+
+      {/* Mobile filter drawer */}
+      {mobileFiltersOpen && (
+        <div
+          className="fixed inset-0 z-100 md:hidden"
+          role="presentation"
+        >
+          <button
+            type="button"
+            aria-label="Close filters"
+            onClick={() => setMobileFiltersOpen(false)}
+            className="absolute inset-0 h-full w-full bg-black/45"
+          />
+
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mobile-filter-title"
+            className="absolute bottom-0 left-0 right-0 max-h-[85svh] overflow-y-auto rounded-t-2xl bg-[#faf8f4] px-5 pb-8 pt-5"
+          >
+            <div className="mb-5 flex items-center justify-between border-b border-[#e9e1d6] pb-5">
+              <div>
+                <p className="text-[9px] uppercase tracking-[2px] text-[#827b70]">
+                  MEHAA GARMENTS
+                </p>
+                <h2
+                  id="mobile-filter-title"
+                  className="mt-1 font-serif text-2xl"
+                >
+                  Refine your edit
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                aria-label="Close filters"
+                onClick={() => setMobileFiltersOpen(false)}
+                className="rounded-full border border-[#e1d9cd] p-2.5"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {renderFilters()}
+
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={clearAllFilters}
+                className="border border-[#dcd5ca] py-4 text-[10px] uppercase tracking-[1.3px]"
+              >
+                Reset
+              </button>
+
+              <button
+                type="button"
+                onClick={applyPriceFilter}
+                className="bg-[#244a3a] py-4 text-[10px] uppercase tracking-[1.3px] text-white"
+              >
+                Show {pagination.totalProducts} sarees
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+    </main>
   );
 };
 
