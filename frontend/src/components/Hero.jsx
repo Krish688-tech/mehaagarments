@@ -69,20 +69,29 @@ const Hero = () => {
       id="home"
       className="relative flex h-screen min-h-150 items-center justify-center overflow-hidden text-center"
     >
-      {/* Background Image */}
-      {/* Background Image */}
-      <img
-        ref={imageRef}
-        src="https://res.cloudinary.com/dkp7rlfq4/image/upload/v1792686680/Mehaa_Garments_m7a9lh.webp"
-        alt="Mehaa Garments saree collection"
-        fetchPriority="high"
-        loading="eager"
-        decoding="async"
-        width="1920"
-        height="1080"
-        className="absolute inset-0 h-full w-full object-cover"
-      />
-      
+      {/* Responsive Hero Background Image */}
+      <picture className="absolute inset-0 h-full w-full">
+        {/* Mobile Image */}
+        <source
+          media="(max-width: 767px)"
+          srcSet="/mehaa-mobile-hero.webp"
+          type="image/webp"
+        />
+
+        {/* Desktop and Tablet Image */}
+        <img
+          ref={imageRef}
+          src="/mehaa-desktop-hero.webp"
+          alt="Mehaa Garments saree collection"
+          width="1920"
+          height="1080"
+          fetchPriority="high"
+          loading="eager"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      </picture>
+
       {/* Background Overlay */}
       <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/30 to-transparent" />
       {/* Hero Content */}
