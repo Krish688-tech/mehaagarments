@@ -79,9 +79,25 @@ const Hero = () => {
 
         <button
           onClick={() => navigate("/shop")}
-          className="mt-8 cursor-pointer rounded-full bg-linear-to-r from-pink-400 via-pink-500 to-pink-600 px-8 py-3 font-medium text-white shadow-lg transition-transform hover:scale-105"
+          className="group relative mt-8 inline-flex cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-full border border-[#E6CC91]/70 bg-linear-to-r from-[#B88A3B] via-[#E7CC8C] to-[#B88A3B] px-8 py-3.5 font-semibold tracking-wide text-[#21170A] shadow-[0_6px_24px_rgba(0,0,0,0.25)] transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(212,175,95,0.4)] active:translate-y-0"
         >
-          Explore Collection
+          <span className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+
+          <span className="relative">Explore Collection</span>
+
+          <svg
+            className="relative h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M7 17 17 7M7 7h10v10"
+            />
+          </svg>
         </button>
       </div>
       {/* Temporary Development Marquee */}
