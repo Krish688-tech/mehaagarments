@@ -101,11 +101,22 @@ export default function OurUnique() {
       </div>
 
       {/* STATIC COLLECTION GRID */}
-      <div className="mx-auto grid max-w-400 grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-7">
+      <div className="mx-auto grid max-w-400 grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-5 lg:grid-cols-6 lg:gap-7">
         {uniqueCategories.map((category, index) => (
           <article
             key={category.id}
-            className="flex min-w-0 flex-col border border-[#e7dfd5] bg-white"
+            className={`flex min-w-0 flex-col border border-[#e7dfd5] bg-white lg:col-span-2 ${
+              uniqueCategories.length % 3 === 2 &&
+              index === uniqueCategories.length - 2
+                ? "lg:col-start-2"
+                : uniqueCategories.length % 3 === 2 &&
+                    index === uniqueCategories.length - 1
+                  ? "lg:col-start-4"
+                  : uniqueCategories.length % 3 === 1 &&
+                      index === uniqueCategories.length - 1
+                    ? "lg:col-start-3"
+                    : ""
+            }`}
           >
             {/* IMAGE */}
             <button

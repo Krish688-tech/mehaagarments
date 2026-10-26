@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
 
@@ -409,9 +409,10 @@ const CheckoutPage = () => {
 
       name: "Mehaa Garments",
 
-      description: checkoutItems.length === 1
-        ? `Purchase - ${checkoutItems[0].name}`
-        : `Mehaa Garments Order - ${checkoutItems.length} items`,
+      description:
+        checkoutItems.length === 1
+          ? `Purchase - ${checkoutItems[0].name}`
+          : `Mehaa Garments Order - ${checkoutItems.length} items`,
 
       order_id: data.razorpayOrder.id,
 
@@ -426,8 +427,8 @@ const CheckoutPage = () => {
       },
 
       notes: {
-    product_id: checkoutItems[0]?._id || "",
-  },
+        product_id: checkoutItems[0]?._id || "",
+      },
 
       theme: {
         color: "#000000",
@@ -1046,8 +1047,16 @@ const CheckoutPage = () => {
             </button>
 
             <p className="text-center text-xs leading-5 text-gray-400">
-              By placing your order, you agree to Mehaa Garments' terms and
-              purchase conditions.
+              By placing your order, you agree to Mehaa Garments{" "}
+              <Link
+                to="/terms-and-conditions"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-blue-600 underline underline-offset-2 transition-colors hover:text-blue-800"
+              >
+                Terms and Conditions
+              </Link>{" "}
+              and purchase conditions.
             </p>
           </div>
 

@@ -1,12 +1,10 @@
-
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 const reels = [
   {
     video:
-      
-       "https://res.cloudinary.com/dkp7rlfq4/video/upload/q_auto,w_720,vc_auto/Video3_prr64u.mp4",
+      "https://res.cloudinary.com/dkp7rlfq4/video/upload/q_auto,w_720,vc_auto/Video3_prr64u.mp4",
     title: "Cotton Elegance",
     desc: "Elegant handcrafted cotton saree with rich texture.",
     slug: "cotton-elegance",
@@ -15,7 +13,7 @@ const reels = [
   },
   {
     video:
-     "https://res.cloudinary.com/dkp7rlfq4/video/upload/v1792655469/Silk_heritage_gf6jrw.mp4",
+      "https://res.cloudinary.com/dkp7rlfq4/video/upload/v1792655469/Silk_heritage_gf6jrw.mp4",
     title: "Silk Heritage",
     desc: "Premium silk saree for festive occasions.",
     slug: "silk-heritage",
@@ -51,7 +49,7 @@ const reels = [
   },
 ];
 
-const ReelCard = ({ item, index, registerVideo, onNavigate }) => {
+const ReelCard = ({ item, index, total, registerVideo, onNavigate }) => {
   const cardRef = useRef(null);
   const videoRef = useRef(null);
 
@@ -88,7 +86,18 @@ const ReelCard = ({ item, index, registerVideo, onNavigate }) => {
   }, [index, registerVideo]);
 
   return (
-    <article ref={cardRef} className="group min-w-0">
+    <article
+      ref={cardRef}
+      className={`group min-w-0 lg:col-span-2 ${
+        reels.length % 3 === 2 && index === reels.length - 2
+          ? "lg:col-start-2"
+          : reels.length % 3 === 2 && index === reels.length - 1
+            ? "lg:col-start-4"
+            : reels.length % 3 === 1 && index === reels.length - 1
+              ? "lg:col-start-3"
+              : ""
+      }`}
+    >
       <button
         type="button"
         onClick={() => onNavigate(item.slug)}
@@ -231,12 +240,13 @@ const ReelsSection = () => {
         </header>
 
         {/* Responsive video gallery */}
-        <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 sm:gap-y-10 lg:grid-cols-3 lg:gap-x-7 lg:gap-y-12">
+        <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 sm:gap-y-10 lg:grid-cols-6 lg:gap-x-7 lg:gap-y-12">
           {reels.map((item, index) => (
             <ReelCard
               key={item.slug}
               item={item}
               index={index}
+              total={reels.length}
               registerVideo={registerVideo}
               onNavigate={handleNavigate}
             />
