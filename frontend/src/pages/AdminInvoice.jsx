@@ -140,7 +140,7 @@ const AdminInvoice = () => {
               <br />
               Phone: 7418541436
               <br />
-              Email: Mehaagarments@gmail.com
+              Email: Support@mehaagarments.com, <br /> Mehaagarments@gmail.com
               <br />
               Website: www.MehaaGarments.in
             </p>

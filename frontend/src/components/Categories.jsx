@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -123,6 +122,20 @@ const Categories = () => {
               className="group relative cursor-pointer overflow-hidden rounded-4xl bg-gray-100"
             >
               <div className="relative h-105 w-full overflow-hidden md:h-135">
+                {/* Desktop-only blurred category image background */}
+                <img
+                  src={cat.image}
+                  alt=""
+                  aria-hidden="true"
+                  loading="lazy"
+                  decoding="async"
+                  className="pointer-events-none absolute inset-0 hidden h-full w-full scale-110 object-cover blur-2xl opacity-80 md:block"
+                />
+
+                {/* Soft overlay for a refined luxury appearance */}
+                <div className="pointer-events-none absolute inset-0 hidden bg-white/15 md:block" />
+
+                {/* Main category image */}
                 <img
                   src={cat.image}
                   alt={cat.name}

@@ -167,32 +167,32 @@ const CheckoutPage = () => {
           },
         });
 
+        // Backend returns the profile inside data.user.
+        const profile = data?.user;
+
+        if (!profile) {
+          console.warn("Customer profile was not returned.");
+          return;
+        }
+
         setFormData((prev) => ({
           ...prev,
-
           firstName:
-            data?.address?.firstName || data?.name?.split(" ")[0] || "",
-
-          lastName:
-            data?.address?.lastName ||
-            data?.name?.split(" ").slice(1).join(" ") ||
+            profile.address?.firstName ||
+            profile.name?.trim().split(/\s+/)[0] ||
             "",
-
-          email: data?.email || "",
-
-          phone: data?.address?.phone || "",
-
-          address: data?.address?.address || "",
-
-          apartment: data?.address?.apartment || "",
-
-          city: data?.address?.city || "",
-
-          state: data?.address?.state || "",
-
-          pincode: data?.address?.pincode || "",
-
-          country: data?.address?.country || "India",
+          lastName:
+            profile.address?.lastName ||
+            profile.name?.trim().split(/\s+/).slice(1).join(" ") ||
+            "",
+          email: profile.email || "",
+          phone: profile.address?.phone || "",
+          address: profile.address?.address || "",
+          apartment: profile.address?.apartment || "",
+          city: profile.address?.city || "",
+          state: profile.address?.state || "",
+          pincode: profile.address?.pincode || "",
+          country: profile.address?.country || "India",
         }));
       } catch (error) {
         console.error("FETCH PROFILE ERROR:", error);

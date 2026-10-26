@@ -61,7 +61,7 @@ const OrderSuccess = () => {
         <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
           <button
             type="button"
-            onClick={() => navigate("/account")}
+            onClick={() => navigate("/orders")}
             className="border border-black px-8 py-3 text-sm font-medium uppercase tracking-wide text-black transition hover:bg-black hover:text-white"
           >
             View My Orders

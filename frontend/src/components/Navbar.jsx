@@ -155,15 +155,26 @@ const Navbar = () => {
 
               {/* Profile Dropdown */}
               {profileOpen && (
-                <div className="absolute top-14 right-0 bg-white shadow-xl rounded-2xl p-4 min-w-60 border border-gray-100">
-                  <div className="border-b border-gray-100 pb-3">
+                <div className="absolute top-14 right-0 z-50 min-w-60 rounded-2xl border border-gray-100 bg-white p-4 shadow-xl">
+                  {/* Profile Header + Close Button */}
+                  <div className="relative border-b border-gray-100 pb-3 pr-7">
                     <p className="text-sm font-medium text-gray-800">
                       {user.name}
                     </p>
 
-                    <p className="text-xs text-gray-500 mt-1 break-all">
+                    <p className="mt-1 break-all text-xs text-gray-500">
                       {user.email}
                     </p>
+
+                    {/* Desktop Close Button */}
+                    <button
+                      type="button"
+                      onClick={() => setProfileOpen(false)}
+                      aria-label="Close profile menu"
+                      className="absolute right-0 top-0 flex h-7 w-7 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-black"
+                    >
+                      <X size={17} strokeWidth={1.8} />
+                    </button>
                   </div>
 
                   <button
@@ -171,21 +182,24 @@ const Navbar = () => {
                       setProfileOpen(false);
                       navigate("/account");
                     }}
-                    className="w-full text-left px-3 py-2 rounded-xl hover:bg-gray-100 transition mt-2"
+                    className="mt-2 w-full rounded-xl px-3 py-2 text-left transition hover:bg-gray-100"
                   >
                     My Account
                   </button>
 
                   <button
-                    onClick={() => navigate("/orders")}
-                    className="w-full text-left px-3 py-2 rounded-xl hover:bg-gray-100 transition"
+                    onClick={() => {
+                      setProfileOpen(false);
+                      navigate("/orders");
+                    }}
+                    className="w-full rounded-xl px-3 py-2 text-left transition hover:bg-gray-100"
                   >
                     My Orders
                   </button>
 
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left px-3 py-2 rounded-xl hover:bg-gray-100 transition text-red-600"
+                    className="w-full rounded-xl px-3 py-2 text-left text-red-600 transition hover:bg-gray-100"
                   >
                     Logout
                   </button>
