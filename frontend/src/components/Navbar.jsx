@@ -98,13 +98,14 @@ const Navbar = () => {
       {/* NAVBAR */}
       <div
         data-site-navbar
-        className={`fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 md:px-10 py-4 transition-all duration-300 ${
+        className={`fixed top-0 left-0 w-full z-50 flex justify-between items-center px-5 md:px-10 py-2.5 transition-all duration-300 ${
           scrolled ? "bg-white/90 backdrop-blur-md shadow-sm" : "bg-transparent"
         }`}
       >
         {/* Logo */}
-        <Link to="/">
-          <h1 className="text-2xl font-semibold tracking-[4px] text-[#2b2b2b]">
+
+        <Link to="/" className="inline-block">
+          <h1 className="font-['Pinyon_Script'] text-3xl font-normal leading-none tracking-normal text-[#2b2b2b] sm:text-4xl">
             Mehaa
           </h1>
         </Link>
@@ -234,7 +235,7 @@ const Navbar = () => {
             <Link
               to="/"
               onClick={() => setMenuOpen(false)}
-              className="text-2xl font-semibold tracking-[4px] text-[#2b2b2b]"
+              className="font-['Pinyon_Script'] text-3xl font-normal leading-none tracking-normal text-[#2b2b2b]"
             >
               Mehaa
             </Link>

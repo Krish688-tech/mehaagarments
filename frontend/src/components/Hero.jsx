@@ -69,10 +69,9 @@ const Hero = () => {
       <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/30 to-transparent" />
       {/* Hero Content */}
       <div className="relative z-10 px-6 text-white">
-        <h1 className="text-4xl font-bold leading-tight sm:text-5xl md:text-6xl">
+        <h1 className="font-['Pinyon_Script'] text-5xl font-normal leading-tight text-white sm:text-6xl md:text-7xl lg:text-8xl">
           Elegance in Every Saree
         </h1>
-
         <p className="mt-4 text-base sm:text-lg md:text-xl">
           Discover timeless tradition with modern style
         </p>
