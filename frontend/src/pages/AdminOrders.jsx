@@ -34,6 +34,9 @@ const AdminOrders = () => {
 
   const [updatingOrderId, setUpdatingOrderId] = useState(null);
 
+  const [newOrderIds, setNewOrderIds] = useState(() => new Set());
+  const SEEN_ORDERS_KEY = "mehaa_admin_seen_orders";
+
   // ============================================================
   // FETCH ORDERS
   // ============================================================
@@ -80,12 +83,31 @@ const AdminOrders = () => {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(
-            data.message || "Failed to fetch orders",
-          );
+          throw new Error(data.message || "Failed to fetch orders");
         }
 
-        setOrders(Array.isArray(data.orders) ? data.orders : []);
+        const fetchedOrders = Array.isArray(data.orders) ? data.orders : [];
+
+        setOrders(fetchedOrders);
+
+        const storedSeenOrders = localStorage.getItem(SEEN_ORDERS_KEY);
+
+        if (storedSeenOrders === null) {
+          // First-time setup: don't highlight existing orders.
+          const initialSeenIds = fetchedOrders.map((order) => order._id);
+          localStorage.setItem(SEEN_ORDERS_KEY, JSON.stringify(initialSeenIds));
+          setNewOrderIds(new Set());
+        } else {
+          const seenIds = new Set(JSON.parse(storedSeenOrders));
+
+          setNewOrderIds(
+            new Set(
+              fetchedOrders
+                .filter((order) => !seenIds.has(order._id))
+                .map((order) => order._id),
+            ),
+          );
+        }
 
         setPagination(
           data.pagination || {
@@ -98,10 +120,7 @@ const AdminOrders = () => {
       } catch (error) {
         console.error("Admin orders error:", error);
 
-        setError(
-          error.message ||
-            "Unable to load orders. Please try again.",
-        );
+        setError(error.message || "Unable to load orders. Please try again.");
 
         setOrders([]);
       } finally {
@@ -179,9 +198,7 @@ const AdminOrders = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.message || "Failed to update order status",
-        );
+        throw new Error(data.message || "Failed to update order status");
       }
 
       setOrders((currentOrders) =>
@@ -189,22 +206,15 @@ const AdminOrders = () => {
           order._id === orderId
             ? {
                 ...order,
-                orderStatus:
-                  data.order?.orderStatus || newStatus,
+                orderStatus: data.order?.orderStatus || newStatus,
               }
             : order,
         ),
       );
     } catch (error) {
-      console.error(
-        "Update order status error:",
-        error,
-      );
+      console.error("Update order status error:", error);
 
-      setError(
-        error.message ||
-          "Failed to update order status.",
-      );
+      setError(error.message || "Failed to update order status.");
     } finally {
       setUpdatingOrderId(null);
     }
@@ -249,16 +259,11 @@ const AdminOrders = () => {
       return order.user.name;
     }
 
-    const firstName =
-      order.shippingAddress?.firstName || "";
+    const firstName = order.shippingAddress?.firstName || "";
 
-    const lastName =
-      order.shippingAddress?.lastName || "";
+    const lastName = order.shippingAddress?.lastName || "";
 
-    return (
-      `${firstName} ${lastName}`.trim() ||
-      "Guest Customer"
-    );
+    return `${firstName} ${lastName}`.trim() || "Guest Customer";
   };
 
   // ============================================================
@@ -266,11 +271,7 @@ const AdminOrders = () => {
   // ============================================================
 
   const getCustomerEmail = (order) => {
-    return (
-      order.user?.email ||
-      order.shippingAddress?.email ||
-      "—"
-    );
+    return order.user?.email || order.shippingAddress?.email || "—";
   };
 
   // ============================================================
@@ -320,9 +321,7 @@ const AdminOrders = () => {
   if (loading) {
     return (
       <div className="min-h-125 flex items-center justify-center">
-        <div className="text-sm text-gray-500">
-          Loading orders...
-        </div>
+        <div className="text-sm text-gray-500">Loading orders...</div>
       </div>
     );
   }
@@ -343,9 +342,7 @@ const AdminOrders = () => {
             Mehaa Garments
           </p>
 
-          <h1 className="mt-2 font-serif text-4xl text-gray-900">
-            Orders
-          </h1>
+          <h1 className="mt-2 font-serif text-4xl text-gray-900">Orders</h1>
 
           <p className="mt-2 text-sm text-gray-500">
             Manage customer orders and fulfillment.
@@ -395,16 +392,12 @@ const AdminOrders = () => {
           <p className="mt-3 text-3xl font-medium text-green-600">
             {
               orders.filter(
-                (order) =>
-                  order.isPaid ||
-                  order.paymentStatus === "paid",
+                (order) => order.isPaid || order.paymentStatus === "paid",
               ).length
             }
           </p>
 
-          <p className="mt-2 text-xs text-gray-400">
-            Current page
-          </p>
+          <p className="mt-2 text-xs text-gray-400">Current page</p>
         </div>
 
         <div className="border border-gray-200 bg-white p-6">
@@ -413,17 +406,10 @@ const AdminOrders = () => {
           </p>
 
           <p className="mt-3 text-3xl font-medium text-yellow-600">
-            {
-              orders.filter(
-                (order) =>
-                  order.orderStatus === "Pending",
-              ).length
-            }
+            {orders.filter((order) => order.orderStatus === "Pending").length}
           </p>
 
-          <p className="mt-2 text-xs text-gray-400">
-            Current page
-          </p>
+          <p className="mt-2 text-xs text-gray-400">Current page</p>
         </div>
 
         <div className="border border-gray-200 bg-white p-6">
@@ -434,17 +420,13 @@ const AdminOrders = () => {
           <p className="mt-3 text-3xl font-medium text-gray-900">
             {formatCurrency(
               orders.reduce(
-                (total, order) =>
-                  total +
-                  Number(order.totalPrice || 0),
+                (total, order) => total + Number(order.totalPrice || 0),
                 0,
               ),
             )}
           </p>
 
-          <p className="mt-2 text-xs text-gray-400">
-            Current page
-          </p>
+          <p className="mt-2 text-xs text-gray-400">Current page</p>
         </div>
       </div>
 
@@ -464,9 +446,7 @@ const AdminOrders = () => {
             <input
               type="text"
               value={searchInput}
-              onChange={(event) =>
-                setSearchInput(event.target.value)
-              }
+              onChange={(event) => setSearchInput(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
                   handleApplyFilters();
@@ -592,17 +572,13 @@ const AdminOrders = () => {
             <tbody>
               {orders.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan="8"
-                    className="px-6 py-20 text-center"
-                  >
+                  <td colSpan="8" className="px-6 py-20 text-center">
                     <p className="text-sm font-medium text-gray-700">
                       No orders found
                     </p>
 
                     <p className="mt-2 text-xs text-gray-400">
-                      Orders will appear here when customers
-                      place orders.
+                      Orders will appear here when customers place orders.
                     </p>
                   </td>
                 </tr>
@@ -610,7 +586,11 @@ const AdminOrders = () => {
                 orders.map((order) => (
                   <tr
                     key={order._id}
-                    className="border-b border-gray-100 transition hover:bg-gray-50"
+                    className={`border-b border-gray-100 transition ${
+                      newOrderIds.has(order._id)
+                        ? "bg-gray-100 hover:bg-gray-200"
+                        : "bg-white hover:bg-gray-50"
+                    }`}
                   >
                     {/* ORDER */}
 
@@ -619,9 +599,13 @@ const AdminOrders = () => {
                         #{order._id.slice(-8).toUpperCase()}
                       </p>
 
-                      <p className="mt-1 text-xs text-gray-400">
-                        {order._id}
-                      </p>
+                      <p className="mt-1 text-xs text-gray-400">{order._id}</p>
+
+                      {newOrderIds.has(order._id) && (
+                        <span className="mt-2 inline-flex rounded-full bg-gray-800 px-2 py-1 text-[10px] font-semibold tracking-wider text-white">
+                          NEW ORDER
+                        </span>
+                      )}
                     </td>
 
                     {/* CUSTOMER */}
@@ -641,27 +625,17 @@ const AdminOrders = () => {
                     <td className="px-6 py-5">
                       <p className="text-sm text-gray-900">
                         {order.orderItems?.length || 0} product
-                        {order.orderItems?.length === 1
-                          ? ""
-                          : "s"}
+                        {order.orderItems?.length === 1 ? "" : "s"}
                       </p>
 
                       <p className="mt-1 text-xs text-gray-400">
-                        {(
-                          order.orderItems || []
-                        ).reduce(
-                          (total, item) =>
-                            total +
-                            Number(item.quantity || 0),
+                        {(order.orderItems || []).reduce(
+                          (total, item) => total + Number(item.quantity || 0),
                           0,
                         )}{" "}
                         item
-                        {(
-                          order.orderItems || []
-                        ).reduce(
-                          (total, item) =>
-                            total +
-                            Number(item.quantity || 0),
+                        {(order.orderItems || []).reduce(
+                          (total, item) => total + Number(item.quantity || 0),
                           0,
                         ) === 1
                           ? ""
@@ -673,9 +647,7 @@ const AdminOrders = () => {
 
                     <td className="px-6 py-5">
                       <p className="text-sm font-semibold text-gray-900">
-                        {formatCurrency(
-                          order.totalPrice,
-                        )}
+                        {formatCurrency(order.totalPrice)}
                       </p>
                     </td>
 
@@ -685,13 +657,11 @@ const AdminOrders = () => {
                       <span
                         className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${getPaymentClass(order)}`}
                       >
-                        {order.isPaid ||
-                        order.paymentStatus === "paid"
+                        {order.isPaid || order.paymentStatus === "paid"
                           ? "Paid"
                           : order.paymentMethod === "cod"
                             ? "COD"
-                            : order.paymentStatus ===
-                                "failed"
+                            : order.paymentStatus === "failed"
                               ? "Failed"
                               : "Pending"}
                       </span>
@@ -705,43 +675,26 @@ const AdminOrders = () => {
 
                     <td className="px-6 py-5">
                       <select
-                        value={
-                          order.orderStatus || "Pending"
-                        }
+                        value={order.orderStatus || "Pending"}
                         disabled={
                           updatingOrderId === order._id ||
-                          order.orderStatus ===
-                            "Delivered" ||
-                          order.orderStatus ===
-                            "Cancelled"
+                          order.orderStatus === "Delivered" ||
+                          order.orderStatus === "Cancelled"
                         }
                         onChange={(event) =>
-                          handleStatusChange(
-                            order._id,
-                            event.target.value,
-                          )
+                          handleStatusChange(order._id, event.target.value)
                         }
                         className={`rounded-full border-0 px-3 py-1.5 text-xs font-medium outline-none ${getStatusClass(order.orderStatus)} disabled:cursor-not-allowed disabled:opacity-70`}
                       >
-                        <option value="Pending">
-                          Pending
-                        </option>
+                        <option value="Pending">Pending</option>
 
-                        <option value="Confirmed">
-                          Confirmed
-                        </option>
+                        <option value="Confirmed">Confirmed</option>
 
-                        <option value="Shipped">
-                          Shipped
-                        </option>
+                        <option value="Shipped">Shipped</option>
 
-                        <option value="Delivered">
-                          Delivered
-                        </option>
+                        <option value="Delivered">Delivered</option>
 
-                        <option value="Cancelled">
-                          Cancelled
-                        </option>
+                        <option value="Cancelled">Cancelled</option>
                       </select>
 
                       {updatingOrderId === order._id && (
@@ -764,11 +717,34 @@ const AdminOrders = () => {
                     <td className="px-6 py-5 text-right">
                       <button
                         type="button"
-                        onClick={() =>
-                          navigate(
-                            `/admin/orders/${order._id}`,
-                          )
-                        }
+                        onClick={() => {
+                          window.dispatchEvent(
+                            new CustomEvent("admin:order-viewed", {
+                              detail: { orderId: order._id },
+                            }),
+                          );
+
+                          const seenIds = new Set(
+                            JSON.parse(
+                              localStorage.getItem(SEEN_ORDERS_KEY) || "[]",
+                            ),
+                          );
+
+                          seenIds.add(order._id);
+
+                          localStorage.setItem(
+                            SEEN_ORDERS_KEY,
+                            JSON.stringify([...seenIds]),
+                          );
+
+                          setNewOrderIds((current) => {
+                            const updated = new Set(current);
+                            updated.delete(order._id);
+                            return updated;
+                          });
+
+                          navigate(`/admin/orders/${order._id}`);
+                        }}
                         className="border border-gray-300 px-4 py-2 text-xs text-gray-700 transition hover:border-black hover:text-black"
                       >
                         View
@@ -789,8 +765,7 @@ const AdminOrders = () => {
       {pagination.totalPages > 1 && (
         <div className="flex flex-col gap-4 border border-gray-200 bg-white px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-gray-500">
-            Page {pagination.currentPage} of{" "}
-            {pagination.totalPages}
+            Page {pagination.currentPage} of {pagination.totalPages}
           </p>
 
           <div className="flex items-center gap-2">
@@ -798,9 +773,7 @@ const AdminOrders = () => {
               type="button"
               disabled={page <= 1}
               onClick={() =>
-                setPage((currentPage) =>
-                  Math.max(currentPage - 1, 1),
-                )
+                setPage((currentPage) => Math.max(currentPage - 1, 1))
               }
               className="border border-gray-300 px-4 py-2 text-sm text-gray-700 transition hover:border-black disabled:cursor-not-allowed disabled:opacity-40"
             >
@@ -809,15 +782,10 @@ const AdminOrders = () => {
 
             <button
               type="button"
-              disabled={
-                page >= pagination.totalPages
-              }
+              disabled={page >= pagination.totalPages}
               onClick={() =>
                 setPage((currentPage) =>
-                  Math.min(
-                    currentPage + 1,
-                    pagination.totalPages,
-                  ),
+                  Math.min(currentPage + 1, pagination.totalPages),
                 )
               }
               className="border border-gray-300 px-4 py-2 text-sm text-gray-700 transition hover:border-black disabled:cursor-not-allowed disabled:opacity-40"

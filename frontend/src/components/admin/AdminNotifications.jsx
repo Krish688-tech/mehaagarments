@@ -4,8 +4,7 @@ import { io } from "socket.io-client";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
-const API_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const SOCKET_URL = API_URL.replace(/\/api\/?$/, "");
 
@@ -36,30 +35,22 @@ const AdminNotifications = () => {
     try {
       setLoading(true);
 
-      const response = await fetch(
-        `${API_URL}/admin/notifications`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await fetch(`${API_URL}/admin/notifications`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.message || "Failed to fetch notifications",
-        );
+        throw new Error(data.message || "Failed to fetch notifications");
       }
 
       setNotifications(data.notifications || []);
       setUnreadCount(data.unreadCount || 0);
     } catch (error) {
-      console.error(
-        "Failed to fetch admin notifications:",
-        error,
-      );
+      console.error("Failed to fetch admin notifications:", error);
     } finally {
       setLoading(false);
     }
@@ -92,17 +83,11 @@ const AdminNotifications = () => {
     socketRef.current = socket;
 
     socket.on("connect", () => {
-      console.log(
-        "Admin notification socket connected:",
-        socket.id,
-      );
+      console.log("Admin notification socket connected:", socket.id);
     });
 
     socket.on("connect_error", (error) => {
-      console.error(
-        "Admin notification socket error:",
-        error.message,
-      );
+      console.error("Admin notification socket error:", error.message);
     });
 
     socket.on("admin:notification", (notification) => {
@@ -122,10 +107,7 @@ const AdminNotifications = () => {
     });
 
     socket.on("disconnect", (reason) => {
-      console.log(
-        "Admin notification socket disconnected:",
-        reason,
-      );
+      console.log("Admin notification socket disconnected:", reason);
     });
 
     return () => {
@@ -148,16 +130,10 @@ const AdminNotifications = () => {
       }
     };
 
-    document.addEventListener(
-      "mousedown",
-      handleClickOutside,
-    );
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside,
-      );
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -184,29 +160,47 @@ const AdminNotifications = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.message || "Failed to mark notification",
-        );
+        throw new Error(data.message || "Failed to mark notification");
       }
 
       setNotifications((previous) =>
         previous.map((item) =>
-          item._id === notification._id
-            ? { ...item, isRead: true }
-            : item,
+          item._id === notification._id ? { ...item, isRead: true } : item,
         ),
       );
 
-      setUnreadCount((previous) =>
-        Math.max(previous - 1, 0),
-      );
+      setUnreadCount((previous) => Math.max(previous - 1, 0));
     } catch (error) {
-      console.error(
-        "Failed to mark notification as read:",
-        error,
-      );
+      console.error("Failed to mark notification as read:", error);
     }
   };
+
+  // ==========================================
+  // MARK ORDER NOTIFICATIONS AS READ
+  // ==========================================
+
+  useEffect(() => {
+    const handleOrderViewed = async (event) => {
+      const { orderId } = event.detail || {};
+
+      if (!orderId) return;
+
+      const matchingNotifications = notifications.filter(
+        (notification) =>
+          notification.order?._id === orderId && !notification.isRead,
+      );
+
+      for (const notification of matchingNotifications) {
+        await markAsRead(notification);
+      }
+    };
+
+    window.addEventListener("admin:order-viewed", handleOrderViewed);
+
+    return () => {
+      window.removeEventListener("admin:order-viewed", handleOrderViewed);
+    };
+  }, [notifications, markAsRead]);
 
   // ==========================================
   // MARK ALL AS READ
@@ -218,22 +212,17 @@ const AdminNotifications = () => {
     }
 
     try {
-      const response = await fetch(
-        `${API_URL}/admin/notifications/read-all`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await fetch(`${API_URL}/admin/notifications/read-all`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.message || "Failed to mark notifications",
-        );
+        throw new Error(data.message || "Failed to mark notifications");
       }
 
       setNotifications((previous) =>
@@ -245,10 +234,7 @@ const AdminNotifications = () => {
 
       setUnreadCount(0);
     } catch (error) {
-      console.error(
-        "Failed to mark all notifications as read:",
-        error,
-      );
+      console.error("Failed to mark all notifications as read:", error);
     }
   };
 
@@ -256,25 +242,18 @@ const AdminNotifications = () => {
   // OPEN NOTIFICATION
   // ==========================================
 
-  const handleNotificationClick = async (
-    notification,
-  ) => {
+  const handleNotificationClick = async (notification) => {
     await markAsRead(notification);
 
     setIsOpen(false);
 
     if (notification.order?._id) {
-      navigate(
-        `/admin/orders/${notification.order._id}`,
-      );
+      navigate(`/admin/orders/${notification.order._id}`);
     }
   };
 
   return (
-    <div
-      ref={containerRef}
-      className="relative"
-    >
+    <div ref={containerRef} className="relative">
       {/* BELL BUTTON */}
 
       <button
@@ -347,10 +326,7 @@ const AdminNotifications = () => {
             ) : notifications.length === 0 ? (
               <div className="px-5 py-12 text-center">
                 <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
-                  <Bell
-                    size={20}
-                    className="text-gray-400"
-                  />
+                  <Bell size={20} className="text-gray-400" />
                 </div>
 
                 <p className="text-sm font-medium text-gray-700">
@@ -366,13 +342,9 @@ const AdminNotifications = () => {
                 <button
                   key={notification._id}
                   type="button"
-                  onClick={() =>
-                    handleNotificationClick(notification)
-                  }
+                  onClick={() => handleNotificationClick(notification)}
                   className={`group flex w-full gap-3 border-b border-gray-100 px-5 py-4 text-left transition hover:bg-gray-50 ${
-                    !notification.isRead
-                      ? "bg-gray-50/80"
-                      : "bg-white"
+                    !notification.isRead ? "bg-gray-50/80" : "bg-white"
                   }`}
                 >
                   {/* STATUS DOT */}
@@ -380,9 +352,7 @@ const AdminNotifications = () => {
                   <div className="mt-1.5 shrink-0">
                     <span
                       className={`block h-2.5 w-2.5 rounded-full ${
-                        notification.isRead
-                          ? "bg-gray-200"
-                          : "bg-black"
+                        notification.isRead ? "bg-gray-200" : "bg-black"
                       }`}
                     />
                   </div>
@@ -408,10 +378,7 @@ const AdminNotifications = () => {
 
                     {notification.order && (
                       <div className="mt-2 flex items-center gap-1 text-[11px] text-gray-400">
-                        <span>
-                          Order #
-                          {notification.order._id.slice(-8)}
-                        </span>
+                        <span>Order #{notification.order._id.slice(-8)}</span>
 
                         <ExternalLink
                           size={11}
