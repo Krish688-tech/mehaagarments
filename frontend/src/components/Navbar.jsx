@@ -397,7 +397,7 @@ const Navbar = () => {
           </div>
 
           {/* Bottom Brand Text */}
-          <div className="mt-auto px-6 pt-6 pb-10">
+          <div className="mt-auto px-6 pt-6 pb-20">
             <p className="text-[11px] tracking-[3px] uppercase text-gray-400">
               Mehaa Garments
             </p>
