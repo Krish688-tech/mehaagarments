@@ -7,7 +7,7 @@ import { useAuth } from "../../context/AuthContext";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 const SOCKET_URL = API_URL.replace(/\/api\/?$/, "");
-const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+const VAPID_PUBLIC_KEY = import.meta.env.VAPID_PUBLIC_KEY;
 
 const urlBase64ToUint8Array = (base64String) => {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -391,7 +391,7 @@ const AdminNotifications = () => {
       }
 
       if (!VAPID_PUBLIC_KEY) {
-        throw new Error("VITE_VAPID_PUBLIC_KEY is missing from your frontend environment.");
+        throw new Error("VAPID_PUBLIC_KEY is missing from your frontend environment.");
       }
 
       const permission = await window.Notification.requestPermission();
