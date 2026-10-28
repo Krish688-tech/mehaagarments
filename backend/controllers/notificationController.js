@@ -1,4 +1,5 @@
 import Notification from "../models/notificationModel.js";
+import PushSubscription from "../models/pushSubscriptionModel.js";
 
 // ==========================================
 // GET ADMIN NOTIFICATIONS
@@ -98,6 +99,89 @@ export const markAllNotificationsAsRead = async (
     res.status(500).json({
       success: false,
       message: "Failed to update notifications",
+    });
+  }
+};
+
+// ==========================================
+// SUBSCRIBE ADMIN TO DESKTOP PUSH NOTIFICATIONS
+// ==========================================
+
+export const subscribeAdminToPush = async (req, res) => {
+  try {
+    const { endpoint, keys } = req.body;
+
+    if (!endpoint || !keys?.p256dh || !keys?.auth) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid push subscription",
+      });
+    }
+
+    await PushSubscription.findOneAndUpdate(
+      { endpoint },
+      {
+        $set: {
+          endpoint,
+          keys: {
+            p256dh: keys.p256dh,
+            auth: keys.auth,
+          },
+          admin: req.user._id,
+        },
+      },
+      {
+        upsert: true,
+        new: true,
+        runValidators: true,
+        setDefaultsOnInsert: true,
+      },
+    );
+
+    return res.status(201).json({
+      success: true,
+      message: "Desktop notifications enabled",
+    });
+  } catch (error) {
+    console.error("Push subscription error:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to enable desktop notifications",
+    });
+  }
+};
+
+// ==========================================
+// UNSUBSCRIBE ADMIN FROM DESKTOP PUSH
+// ==========================================
+
+export const unsubscribeAdminFromPush = async (req, res) => {
+  try {
+    const { endpoint } = req.body;
+
+    if (!endpoint) {
+      return res.status(400).json({
+        success: false,
+        message: "Subscription endpoint is required",
+      });
+    }
+
+    await PushSubscription.deleteOne({
+      endpoint,
+      admin: req.user._id,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Desktop notifications disabled",
+    });
+  } catch (error) {
+    console.error("Push unsubscribe error:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to disable desktop notifications",
     });
   }
 };

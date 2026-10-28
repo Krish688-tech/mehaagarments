@@ -4,6 +4,8 @@ import {
   getAdminNotifications,
   markNotificationAsRead,
   markAllNotificationsAsRead,
+  subscribeAdminToPush,
+  unsubscribeAdminFromPush,
 } from "../controllers/notificationController.js";
 
 import { protect } from "../middleware/authMiddleware.js";
@@ -42,6 +44,24 @@ router.patch(
   protect,
   adminOnly,
   markNotificationAsRead,
+);
+
+// ==========================================
+// DESKTOP PUSH SUBSCRIPTION
+// ==========================================
+
+router.post(
+  "/push/subscribe",
+  protect,
+  adminOnly,
+  subscribeAdminToPush,
+);
+
+router.delete(
+  "/push/unsubscribe",
+  protect,
+  adminOnly,
+  unsubscribeAdminFromPush,
 );
 
 export default router;
