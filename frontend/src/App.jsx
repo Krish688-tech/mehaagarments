@@ -17,6 +17,7 @@ import MyOrders from "./pages/MyOrders";
 import OrderDetails from "./pages/OrderDetails";
 import OrderSuccess from "./pages/OrderSuccess";
 import AdminNewsletter from "./pages/AdminNewsletter";
+import UnsubscribePage from "./pages/UnsubscribePage";
 
 import AboutUs from "./pages/AboutUs";
 import ContactUs from "./pages/ContactUs";
@@ -65,7 +66,7 @@ function App() {
             element={<ProductSpecification />}
           />
           <Route path="/cart" element={<CartPage />} />
-          
+
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/contact-us" element={<ContactUs />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
@@ -73,6 +74,9 @@ function App() {
           <Route path="/refund-policy" element={<RefundPolicy />} />
           <Route path="/payment-policy" element={<PaymentPolicy />} />
           <Route path="/terms-and-conditions" element={<TermsConditions />} />
+
+          <Route path="/unsubscribe" element={<UnsubscribePage />} />
+          <Route path="/unsubscribe-preview" element={<UnsubscribePage />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/checkout" element={<CheckoutPage />} />
