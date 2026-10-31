@@ -23,6 +23,7 @@ import uniqueCategoryRoutes from "./routes/uniqueCategoryRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import newsletterRoutes from "./routes/newsletterRoutes.js";
+import newsletterCampaignRoutes from "./routes/newsletterCampaignRoutes.js";
 
 import { setSocketIO } from "./services/notificationService.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
@@ -242,6 +243,8 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/cart", cartRoutes);
 
 app.use("/api/newsletter", newsletterRoutes);
+
+app.use("/api/newsletter-campaigns", newsletterCampaignRoutes);
 
 // ==========================================
 // SERVER

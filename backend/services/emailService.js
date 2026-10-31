@@ -1,4 +1,7 @@
 import EmailLog from "../models/emailLogModel.js";
+import {
+  createUnsubscribeToken,
+} from "../utils/newsletterUnsubscribe.js";
 
 // ==========================================
 // RESEND EMAIL CONFIGURATION
@@ -162,6 +165,336 @@ export const sendEmail = async ({
     throw error;
   }
 };
+
+// ==========================================
+// HTML ESCAPING
+// ==========================================
+
+const escapeNewsletterHtml = (value = "") => {
+  return String(value).replace(/[&<>"']/g, (character) => {
+    const entities = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    };
+
+    return entities[character];
+  });
+};
+
+// ==========================================
+// VALIDATE PUBLIC EMAIL URL
+// ==========================================
+
+const getNewsletterUrl = (value) => {
+  if (!value) return "";
+
+  try {
+    const url = new URL(value);
+
+    if (!["http:", "https:"].includes(url.protocol)) {
+      return "";
+    }
+
+    return url.toString();
+  } catch {
+    return "";
+  }
+};
+
+// ==========================================
+// SEND NEWSLETTER EMAIL — RESEND
+// ==========================================
+
+export const sendNewsletterEmail = async ({
+  subscriber,
+  campaign,
+}) => {
+  if (!subscriber?._id || !subscriber?.email) {
+    throw new Error("Valid newsletter subscriber is required");
+  }
+
+  if (!subscriber.isSubscribed || subscriber.consent !== true) {
+    return {
+      sent: false,
+      skipped: true,
+      reason: "subscriber_not_eligible",
+    };
+  }
+
+  if (!campaign?._id || !campaign?.subject) {
+    throw new Error("Valid newsletter campaign is required");
+  }
+
+  const apiKey = process.env.RESEND_API_KEY;
+
+  if (!apiKey) {
+    throw new Error("RESEND_API_KEY is not configured");
+  }
+
+  const frontendUrl = (
+    process.env.FRONTEND_URL || "http://localhost:5173"
+  ).replace(/\/+$/, "");
+
+  const token = createUnsubscribeToken(subscriber);
+
+  const unsubscribeParams = new URLSearchParams({
+    subscriberId: String(subscriber._id),
+    token,
+  });
+
+  const unsubscribeUrl =
+    `${frontendUrl}/unsubscribe?${unsubscribeParams.toString()}`;
+
+  const privacyUrl = getNewsletterUrl(
+    process.env.PRIVACY_POLICY_URL ||
+    `${frontendUrl}/privacy-policy`
+  );
+
+  const contactUrl = getNewsletterUrl(
+    process.env.CONTACT_URL ||
+    `${frontendUrl}/contact`
+  );
+
+  const bannerUrl = getNewsletterUrl(campaign.bannerUrl);
+
+  const buttonUrl = getNewsletterUrl(campaign.buttonUrl);
+
+  const campaignName = escapeNewsletterHtml(campaign.campaignName);
+  const subject = campaign.subject.trim();
+  const previewText = escapeNewsletterHtml(campaign.previewText);
+  const heading = escapeNewsletterHtml(campaign.heading);
+  const message = escapeNewsletterHtml(campaign.message);
+  const buttonText = escapeNewsletterHtml(
+    campaign.buttonText || "EXPLORE COLLECTION"
+  );
+
+  const bannerHtml = bannerUrl
+    ? `
+      <img
+        src="${escapeNewsletterHtml(bannerUrl)}"
+        alt="Mehaa Garments Collection"
+        width="100%"
+        style="
+          display:block;
+          width:100%;
+          max-width:600px;
+          height:auto;
+          border:0;
+        "
+      />
+    `
+    : "";
+
+  const buttonHtml = buttonUrl
+    ? `
+      <div style="text-align:center;margin-top:30px;">
+        <a
+          href="${escapeNewsletterHtml(buttonUrl)}"
+          style="
+            display:inline-block;
+            padding:15px 30px;
+            background:#111111;
+            color:#ffffff;
+            text-decoration:none;
+            font-size:12px;
+            font-weight:bold;
+            letter-spacing:1px;
+          "
+        >
+          ${buttonText}
+        </a>
+      </div>
+    `
+    : "";
+
+  const privacyLink = privacyUrl
+    ? `<a href="${escapeNewsletterHtml(privacyUrl)}" style="color:#777;text-decoration:underline;">Privacy Policy</a>`
+    : "";
+
+  const contactLink = contactUrl
+    ? `<a href="${escapeNewsletterHtml(contactUrl)}" style="color:#777;text-decoration:underline;">Contact Us</a>`
+    : "";
+
+  const footerLinks = [
+    `<a href="${escapeNewsletterHtml(unsubscribeUrl)}" style="color:#777;text-decoration:underline;">Unsubscribe</a>`,
+    privacyLink,
+    contactLink,
+  ].filter(Boolean).join(' <span style="color:#ccc;">|</span> ');
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+        <title>${escapeNewsletterHtml(subject)}</title>
+      </head>
+
+      <body style="margin:0;padding:0;background:#f7f5f2;font-family:Arial,Helvetica,sans-serif;">
+
+        <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">
+          ${previewText}
+        </div>
+
+        <table
+          role="presentation"
+          width="100%"
+          cellpadding="0"
+          cellspacing="0"
+          style="background:#f7f5f2;padding:30px 12px;"
+        >
+          <tr>
+            <td align="center">
+
+              <table
+                role="presentation"
+                width="100%"
+                cellpadding="0"
+                cellspacing="0"
+                style="max-width:600px;background:#ffffff;"
+              >
+
+                <!-- BRAND HEADER -->
+
+                <tr>
+                  <td
+                    align="center"
+                    style="background:#111111;padding:30px 20px;"
+                  >
+                    <div style="font-family:Georgia,serif;font-size:34px;font-style:italic;color:#ffffff;">
+                      Mehaa
+                    </div>
+
+                    <div style="margin-top:8px;font-size:10px;letter-spacing:4px;color:#bbbbbb;">
+                      ELEGANCE IN EVERY SAREE
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- BANNER -->
+
+                ${bannerHtml ? `
+                  <tr>
+                    <td>
+                      ${bannerHtml}
+                    </td>
+                  </tr>
+                ` : ""}
+
+                <!-- CONTENT -->
+
+                <tr>
+                  <td style="padding:40px 30px;text-align:center;">
+
+                    <h1 style="margin:0;font-family:Georgia,serif;font-size:28px;line-height:1.4;font-weight:normal;color:#171717;">
+                      ${heading}
+                    </h1>
+
+                    <div style="width:48px;height:1px;background:#cccccc;margin:22px auto;"></div>
+
+                    <p style="margin:0;font-size:15px;line-height:1.9;color:#666666;white-space:pre-line;">
+                      ${message}
+                    </p>
+
+                    ${buttonHtml}
+
+                  </td>
+                </tr>
+
+                <!-- FOOTER -->
+
+                <tr>
+                  <td
+                    align="center"
+                    style="background:#f8f8f8;border-top:1px solid #eeeeee;padding:30px 20px;"
+                  >
+
+                    <p style="margin:0;font-family:Georgia,serif;font-size:20px;color:#222222;">
+                      Mehaa Garments
+                    </p>
+
+                    <p style="margin:10px 0 0;font-size:12px;line-height:1.7;color:#777777;">
+                      Thank you for being part of our journey.
+                    </p>
+
+                    <p style="margin:22px 0 0;font-size:11px;line-height:2;color:#777777;">
+                      ${footerLinks}
+                    </p>
+
+                    <p style="margin:18px 0 0;font-size:10px;color:#999999;">
+                      © ${new Date().getFullYear()} Mehaa Garments. All rights reserved.
+                    </p>
+
+                  </td>
+                </tr>
+
+              </table>
+
+            </td>
+          </tr>
+        </table>
+
+      </body>
+    </html>
+  `;
+
+  const text = `
+${campaignName}
+
+${campaign.heading}
+
+${campaign.message}
+
+${buttonUrl ? `Explore our collection: ${buttonUrl}` : ""}
+
+Unsubscribe from promotional emails:
+${unsubscribeUrl}
+
+Privacy Policy: ${privacyUrl || ""}
+Contact Us: ${contactUrl || ""}
+
+Mehaa Garments
+© ${new Date().getFullYear()} Mehaa Garments.
+  `.trim();
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: getFromAddress(),
+      to: [subscriber.email.trim().toLowerCase()],
+      subject,
+      html,
+      text,
+    }),
+  });
+
+  const result = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(
+      result?.message ||
+      result?.error ||
+      `Resend API request failed with status ${response.status}`
+    );
+  }
+
+  console.log(
+    `NEWSLETTER EMAIL ACCEPTED: ${campaign.campaignName} → ${subscriber.email}`
+  );
+
+  return {
+    sent: true,
+    messageId: result.id || null,
+  };
+};
+
 
 // ==========================================
 // FORMAT CURRENCY
@@ -1122,6 +1455,7 @@ Total: ${formatCurrency(order.totalPrice)}
 
 export default {
   sendEmail,
+  sendNewsletterEmail,
   sendCustomerOrderConfirmationEmail,
   sendCustomerDispatchedEmail,
   sendCustomerDeliveredEmail,

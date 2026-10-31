@@ -3,6 +3,9 @@ import mongoose from "mongoose";
 import crypto from "crypto";
 
 import NewsletterSubscriber from "../models/newsletterModel.js";
+import {
+  verifyUnsubscribeToken,
+} from "../utils/newsletterUnsubscribe.js";
 
 // ==========================================
 // EMAIL VALIDATION
@@ -10,36 +13,6 @@ import NewsletterSubscriber from "../models/newsletterModel.js";
 
 const isValidEmail = (email) => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-};
-
-// ==========================================
-// UNSUBSCRIBE TOKEN HELPERS
-// ==========================================
-
-const generateUnsubscribeToken = (subscriber) => {
-  const secret = process.env.NEWSLETTER_UNSUBSCRIBE_SECRET;
-
-  if (!secret) {
-    throw new Error("Newsletter unsubscribe secret is missing");
-  }
-
-  return crypto
-    .createHmac("sha256", secret)
-    .update(`${subscriber._id}:${subscriber.email}`)
-    .digest("hex");
-};
-
-const verifyUnsubscribeToken = (subscriber, token) => {
-  if (!/^[a-f0-9]{64}$/i.test(token || "")) {
-    return false;
-  }
-
-  const expected = generateUnsubscribeToken(subscriber);
-
-  return crypto.timingSafeEqual(
-    Buffer.from(expected, "hex"),
-    Buffer.from(token, "hex")
-  );
 };
 
 // ==========================================
@@ -348,10 +321,3 @@ export const exportNewsletterSubscribers = async (req, res) => {
   }
 };
 
-// ==========================================
-// INTERNAL HELPER FOR FUTURE EMAIL CAMPAIGNS
-// ==========================================
-
-export const createUnsubscribeToken = (subscriber) => {
-  return generateUnsubscribeToken(subscriber);
-};
