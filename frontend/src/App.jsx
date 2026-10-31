@@ -16,7 +16,7 @@ import CartPage from "./pages/CartPage";
 import MyOrders from "./pages/MyOrders";
 import OrderDetails from "./pages/OrderDetails";
 import OrderSuccess from "./pages/OrderSuccess";
-
+import AdminNewsletter from "./pages/AdminNewsletter";
 
 import AboutUs from "./pages/AboutUs";
 import ContactUs from "./pages/ContactUs";
@@ -60,8 +60,12 @@ function App() {
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/shop" element={<ShopPage />} />
           <Route path="/collections/:category" element={<CollectionPage />} />
-          <Route path="/collection/:category/specification/:id" element={<ProductSpecification />} />
+          <Route
+            path="/collection/:category/specification/:id"
+            element={<ProductSpecification />}
+          />
           <Route path="/cart" element={<CartPage />} />
+          
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/contact-us" element={<ContactUs />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
@@ -73,9 +77,9 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/account" element={<MyAccount />} />
-              <Route path="/orders" element={<MyOrders />} />
-              <Route path="/orders/:id" element={<OrderDetails />} />
-             <Route path="/order-success" element={<OrderSuccess />} />
+            <Route path="/orders" element={<MyOrders />} />
+            <Route path="/orders/:id" element={<OrderDetails />} />
+            <Route path="/order-success" element={<OrderSuccess />} />
           </Route>
         </Route>
 
@@ -88,13 +92,20 @@ function App() {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/products" element={<AdminProducts />} />
             <Route path="/admin/products/add" element={<AdminAddProduct />} />
-            <Route path="/admin/products/edit/:id" element={<AdminEditProduct />} />
+            <Route
+              path="/admin/products/edit/:id"
+              element={<AdminEditProduct />}
+            />
             <Route path="/admin/orders" element={<AdminOrders />} />
             <Route path="/admin/orders/:id" element={<AdminOrderDetails />} />
             <Route path="/admin/customers" element={<AdminCustomers />} />
             <Route path="/admin/categories" element={<AdminCategories />} />
-            <Route path="/admin/unique-categories" element={<AdminUniqueCategories />} />
+            <Route
+              path="/admin/unique-categories"
+              element={<AdminUniqueCategories />}
+            />
             <Route path="/admin/reviews" element={<AdminReviews />} />
+            <Route path="/admin/newsletter" element={<AdminNewsletter />} />
             <Route path="/admin/invoices/:id" element={<AdminInvoice />} />
           </Route>
         </Route>

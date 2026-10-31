@@ -71,6 +71,10 @@ const AdminLayout = () => {
               <NavLink to="/admin/unique-categories" className={navLinkClass}>
                 Unique Categories
               </NavLink>
+
+              <NavLink to="/admin/newsletter" className={navLinkClass}>
+                Newsletter
+              </NavLink>
             </nav>
 
             {/* ADMIN USER */}
