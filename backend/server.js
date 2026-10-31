@@ -22,6 +22,7 @@ import invoiceRoutes from "./routes/invoiceRoutes.js";
 import uniqueCategoryRoutes from "./routes/uniqueCategoryRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
+import newsletterRoutes from "./routes/newsletterRoutes.js";
 
 import { setSocketIO } from "./services/notificationService.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
@@ -239,6 +240,8 @@ app.use("/api/invoices", invoiceRoutes);
 app.use("/api/reviews", reviewRoutes);
 
 app.use("/api/cart", cartRoutes);
+
+app.use("/api/newsletter", newsletterRoutes);
 
 // ==========================================
 // SERVER
