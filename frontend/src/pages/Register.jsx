@@ -128,7 +128,7 @@ const Register = () => {
       title="Create Account"
       subtitle="Join the elegance of Mehaa Garments"
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 md:space-y-3">
 
         {/* Name */}
         <div>
@@ -144,7 +144,7 @@ const Register = () => {
             onChange={handleChange}
             autoComplete="name"
             required
-            className="w-full mt-2 border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-black transition"
+            className="w-full mt-1.5 md:mt-1 border border-gray-300 rounded-xl px-4 py-3 md:py-2.5 outline-none focus:border-black transition"
           />
         </div>
 
@@ -162,7 +162,7 @@ const Register = () => {
             onChange={handleChange}
             autoComplete="email"
             required
-            className="w-full mt-2 border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-black transition"
+            className="w-full mt-1.5 md:mt-1 border border-gray-300 rounded-xl px-4 py-3 md:py-2.5 outline-none focus:border-black transition"
           />
         </div>
 

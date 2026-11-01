@@ -1,13 +1,6 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  Mail,
-  Phone,
-  MapPin,
-  ArrowUpRight,
-  Loader2,
-} from "lucide-react";
+import { Mail, Phone, MapPin, ArrowUpRight, Loader2 } from "lucide-react";
 
 import { FaInstagram, FaFacebookF, FaYoutube } from "react-icons/fa";
 
@@ -69,7 +62,7 @@ const Footer = () => {
         {
           email,
           consent: true,
-        }
+        },
       );
 
       if (data.success) {
@@ -164,9 +157,7 @@ const Footer = () => {
                   <input
                     type="checkbox"
                     checked={newsletterConsent}
-                    onChange={(e) =>
-                      setNewsletterConsent(e.target.checked)
-                    }
+                    onChange={(e) => setNewsletterConsent(e.target.checked)}
                     disabled={newsletterLoading}
                     className="mt-0.5 accent-[#007d76] cursor-pointer shrink-0"
                   />
@@ -178,8 +169,8 @@ const Footer = () => {
                 </label>
 
                 <p className="text-[11px] text-white/30 mt-3">
-                  Receive updates about new collections and special offers.
-                  You can unsubscribe anytime.
+                  Receive updates about new collections and special offers. You
+                  can unsubscribe anytime.
                 </p>
               </form>
             </div>
@@ -190,7 +181,6 @@ const Footer = () => {
       {/* Main Footer */}
       <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 py-14 lg:py-16">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-[1.5fr_1fr_1fr_1.3fr] gap-x-8 gap-y-12">
-
           {/* Brand */}
           <div className="col-span-2 md:col-span-4 lg:col-span-1">
             <Link
@@ -249,23 +239,38 @@ const Footer = () => {
             </h3>
 
             <div className="flex flex-col gap-4">
-              <Link to="/" className="text-sm text-white/65 hover:text-white transition">
+              <Link
+                to="/"
+                className="text-sm text-white/65 hover:text-white transition"
+              >
                 Home
               </Link>
 
-              <Link to="/shop" className="text-sm text-white/65 hover:text-white transition">
+              <Link
+                to="/shop"
+                className="text-sm text-white/65 hover:text-white transition"
+              >
                 Categories
               </Link>
 
-              <Link to="/shop" className="text-sm text-white/65 hover:text-white transition">
+              <Link
+                to="/shop"
+                className="text-sm text-white/65 hover:text-white transition"
+              >
                 Collections
               </Link>
 
-              <Link to="/about-us" className="text-sm text-white/65 hover:text-white transition">
+              <Link
+                to="/about-us"
+                className="text-sm text-white/65 hover:text-white transition"
+              >
                 About Us
               </Link>
 
-              <Link to="/contact-us" className="text-sm text-white/65 hover:text-white transition">
+              <Link
+                to="/contact-us"
+                className="text-sm text-white/65 hover:text-white transition"
+              >
                 Contact Us
               </Link>
             </div>
@@ -278,23 +283,38 @@ const Footer = () => {
             </h3>
 
             <div className="flex flex-col gap-4">
-              <Link to="/privacy-policy" className="text-sm text-white/65 hover:text-white transition">
+              <Link
+                to="/privacy-policy"
+                className="text-sm text-white/65 hover:text-white transition"
+              >
                 Privacy Policy
               </Link>
 
-              <Link to="/shipping-policy" className="text-sm text-white/65 hover:text-white transition">
+              <Link
+                to="/shipping-policy"
+                className="text-sm text-white/65 hover:text-white transition"
+              >
                 Shipping Policy
               </Link>
 
-              <Link to="/refund-policy" className="text-sm text-white/65 hover:text-white transition">
+              <Link
+                to="/refund-policy"
+                className="text-sm text-white/65 hover:text-white transition"
+              >
                 Refund & Cancellation
               </Link>
 
-              <Link to="/payment-policy" className="text-sm text-white/65 hover:text-white transition">
+              <Link
+                to="/payment-policy"
+                className="text-sm text-white/65 hover:text-white transition"
+              >
                 Payment Policy
               </Link>
 
-              <Link to="/terms-and-conditions" className="text-sm text-white/65 hover:text-white transition">
+              <Link
+                to="/terms-and-conditions"
+                className="text-sm text-white/65 hover:text-white transition"
+              >
                 Terms & Conditions
               </Link>
             </div>
@@ -327,10 +347,12 @@ const Footer = () => {
 
               <a
                 href="mailto:support@mehaagarments.com"
-                className="flex items-center gap-3 text-sm text-white/55 hover:text-white transition break-all"
+                className="flex items-center gap-3 text-sm text-white/55 hover:text-white transition whitespace-nowrap"
               >
                 <Mail size={16} className="text-white/40 shrink-0" />
-                support@mehaagarments.com
+                <span className="whitespace-nowrap">
+                  support@mehaagarments.com
+                </span>
               </a>
             </div>
           </div>

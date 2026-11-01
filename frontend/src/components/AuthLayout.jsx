@@ -1,15 +1,15 @@
+
 import React from "react";
 
 const AuthLayout = ({ children, title, subtitle }) => {
   return (
-
-      <div className="h-screen  bg-[#f8f5f0] flex justify-center items-center px-4 overflow-hidden">
+    <div className="min-h-screen md:min-h-screen bg-[#f8f5f0] flex justify-center items-center px-4 overflow-x-hidden md:pt-16 md:pb-5">
 
       {/* Card */}
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 md:p-6 border border-gray-100">
 
         {/* Brand */}
-        <div className="text-center mb-4">
+        <div className="text-center mb-4 md:mb-2">
           <h1 className="text-4xl font-semibold tracking-wide text-[#3b2f2f]">
             Mehaa
           </h1>
@@ -20,7 +20,7 @@ const AuthLayout = ({ children, title, subtitle }) => {
         </div>
 
         {/* Heading */}
-        <div className="mb-6 text-center">
+        <div className="mb-6 md:mb-4 text-center">
           <h2 className="text-2xl font-semibold text-gray-800">
             {title}
           </h2>

@@ -213,7 +213,7 @@ const Login = () => {
 
   return (
     <AuthLayout title="Welcome Back" subtitle="Login to continue shopping">
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-5 md:space-y-3">
         {/* Email */}
         <div>
           <label className="text-sm text-gray-600">Email Address</label>
@@ -226,7 +226,7 @@ const Login = () => {
             onChange={handleChange}
             autoComplete="email"
             required
-            className="w-full mt-2 border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-black transition"
+            className="w-full mt-1.5 md:mt-1 border border-gray-300 rounded-xl px-4 py-3 md:py-2.5 outline-none focus:border-black transition"
           />
         </div>
 
@@ -242,7 +242,7 @@ const Login = () => {
             onChange={handleChange}
             autoComplete="current-password"
             required
-            className="w-full mt-2 border border-gray-300 rounded-xl px-4 py-3 pr-12 outline-none focus:border-black transition"
+            className="w-full mt-1.5 md:mt-1 border border-gray-300 rounded-xl px-4 py-3 md:py-2.5 outline-none focus:border-black transition"
           />
 
           <button
