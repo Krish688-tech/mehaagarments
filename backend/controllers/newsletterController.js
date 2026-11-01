@@ -266,19 +266,17 @@ export const getNewsletterSubscribers = async (req, res) => {
   }
 };
 
-// ==========================================
-// ADMIN - EXPORT ACTIVE SUBSCRIBERS
+
+ // ==========================================
+// ADMIN - EXPORT ALL NEWSLETTER SUBSCRIBERS
 // GET /api/newsletter/admin/export
 // ADMIN ONLY
 // ==========================================
 
 export const exportNewsletterSubscribers = async (req, res) => {
   try {
-    const subscribers = await NewsletterSubscriber.find({
-      isSubscribed: true,
-      consent: true,
-    })
-      .select("email subscribedAt")
+    const subscribers = await NewsletterSubscriber.find({})
+      .select("email subscribedAt isSubscribed consent")
       .sort({ subscribedAt: -1 })
       .lean();
 
@@ -287,18 +285,20 @@ export const exportNewsletterSubscribers = async (req, res) => {
     };
 
     const rows = [
-      ["Email", "Subscribed At"],
+      ["Email", "Subscribed At", "Status", "Marketing Consent"],
       ...subscribers.map((subscriber) => [
         subscriber.email,
         subscriber.subscribedAt
           ? subscriber.subscribedAt.toISOString()
           : "",
+        subscriber.isSubscribed ? "Active" : "Unsubscribed",
+        subscriber.consent ? "Yes" : "No",
       ]),
     ];
 
     const csv = rows
       .map((row) => row.map(escapeCSV).join(","))
-      .join("\n");
+      .join("\r\n");
 
     res.setHeader(
       "Content-Type",
@@ -320,4 +320,3 @@ export const exportNewsletterSubscribers = async (req, res) => {
     });
   }
 };
-

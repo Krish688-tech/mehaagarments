@@ -523,7 +523,7 @@ export const getNewsletterCampaignDetails = async (req, res) => {
       });
     }
 
-    const [sent, failed, pending, skipped] = await Promise.all([
+    const [sent, failed, pending, skipped, processing] = await Promise.all([
       NewsletterCampaignRecipient.countDocuments({
         campaign: id,
         status: "sent",
@@ -540,6 +540,10 @@ export const getNewsletterCampaignDetails = async (req, res) => {
         campaign: id,
         status: "skipped",
       }),
+      NewsletterCampaignRecipient.countDocuments({
+        campaign: id,
+        status: "processing",
+      }),
     ]);
 
     return res.status(200).json({
@@ -550,6 +554,7 @@ export const getNewsletterCampaignDetails = async (req, res) => {
         failed,
         pending,
         skipped,
+        processing,
       },
     });
   } catch (error) {
