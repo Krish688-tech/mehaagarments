@@ -28,6 +28,8 @@ import newsletterCampaignRoutes from "./routes/newsletterCampaignRoutes.js";
 import { setSocketIO } from "./services/notificationService.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import shippingRoutes from "./routes/shippingRoutes.js";
+import customOrderRoutes from "./routes/customOrderRoutes.js";
+import adminCustomOrderRoutes from "./routes/adminCustomOrderRoutes.js";
 
 dotenv.config();
 
@@ -245,6 +247,10 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/newsletter", newsletterRoutes);
 
 app.use("/api/newsletter-campaigns", newsletterCampaignRoutes);
+
+app.use("/api/custom-orders", customOrderRoutes);
+
+app.use("/api/admin/custom-orders", adminCustomOrderRoutes);
 
 // ==========================================
 // SERVER

@@ -1,12 +1,9 @@
+
 import webpush from "web-push";
 import PushSubscription from "../models/pushSubscriptionModel.js";
 import Notification from "../models/notificationModel.js";
 
 let ioInstance = null;
-
-// ==========================================
-// WEB PUSH CONFIGURATION
-// ==========================================
 
 webpush.setVapidDetails(
   process.env.VAPID_SUBJECT,
@@ -24,9 +21,7 @@ export const emitCustomerShippingUpdate = ({
   shipping,
   historyEvent = null,
 }) => {
-  if (!ioInstance || !userId || !orderId) {
-    return;
-  }
+  if (!ioInstance || !userId || !orderId) return;
 
   ioInstance
     .to(`customer:${userId.toString()}`)
@@ -38,23 +33,25 @@ export const emitCustomerShippingUpdate = ({
 };
 
 // ==========================================
-// SEND PUSH NOTIFICATIONS TO ADMIN DEVICES
+// ADMIN PUSH NOTIFICATIONS
 // ==========================================
 
 const sendAdminPushNotification = async (notification) => {
   try {
     const subscriptions = await PushSubscription.find();
 
-    if (!subscriptions.length) {
-      return;
-    }
+    if (!subscriptions.length) return;
+
+    const isCustomOrder = Boolean(notification.customOrder);
 
     const payload = JSON.stringify({
       title: notification.title,
       body: notification.message,
-      url: notification.order
-        ? `/admin/orders/${notification.order}`
-        : "/admin/orders",
+      url: isCustomOrder
+        ? `/admin/custom-orders/${notification.customOrder}`
+        : notification.order
+          ? `/admin/orders/${notification.order}`
+          : "/admin/orders",
       notificationId: notification._id.toString(),
     });
 
@@ -69,7 +66,6 @@ const sendAdminPushNotification = async (notification) => {
             payload,
           );
         } catch (error) {
-          // Remove expired or invalid browser subscriptions.
           if (error.statusCode === 404 || error.statusCode === 410) {
             await PushSubscription.deleteOne({
               _id: subscription._id,
@@ -88,81 +84,73 @@ const sendAdminPushNotification = async (notification) => {
   }
 };
 
+// ==========================================
+// CREATE ADMIN NOTIFICATION
+// ==========================================
+
 export const createAdminNotification = async ({
   type,
   title,
   message,
   orderId = null,
+  customOrderId = null,
 }) => {
   try {
-    // ==========================================
-    // FAST DUPLICATE CHECK
-    // ==========================================
-
+    // Duplicate protection
     if (type === "NEW_ORDER" && orderId) {
-      const existingNotification =
-        await Notification.findOne({
-          type: "NEW_ORDER",
-          order: orderId,
-        });
+      const existing = await Notification.findOne({
+        type: "NEW_ORDER",
+        order: orderId,
+      });
 
-      if (existingNotification) {
-        return existingNotification;
-      }
+      if (existing) return existing;
     }
 
-    // ==========================================
-    // CREATE NOTIFICATION
-    // ==========================================
+    if (type === "CUSTOM_ORDER" && customOrderId) {
+      const existing = await Notification.findOne({
+        type: "CUSTOM_ORDER",
+        customOrder: customOrderId,
+      });
+
+      if (existing) return existing;
+    }
 
     const notification = await Notification.create({
       type,
       title,
       message,
       order: orderId,
+      customOrder: customOrderId,
     });
 
-  
-
-    // ==========================================
-    // REAL-TIME ADMIN NOTIFICATION
-    // ==========================================
-
+    // Real-time admin notification
     if (ioInstance) {
       ioInstance
         .to("admins")
         .emit("admin:notification", notification);
     }
 
-    // ==========================================
-    // WINDOWS DESKTOP PUSH NOTIFICATION
-    // ==========================================
-
+    // Desktop push notification
     await sendAdminPushNotification(notification);
 
     return notification;
   } catch (error) {
-    // ==========================================
-    // DATABASE-LEVEL DUPLICATE PROTECTION
-    // ==========================================
-
-    if (
-      error?.code === 11000 &&
-      type === "NEW_ORDER" &&
-      orderId
-    ) {
-      const existingNotification =
-        await Notification.findOne({
+    // Handle duplicate database entries
+    if (error?.code === 11000) {
+      if (type === "NEW_ORDER" && orderId) {
+        return await Notification.findOne({
           type: "NEW_ORDER",
           order: orderId,
         });
+      }
 
-      return existingNotification || null;
+      if (type === "CUSTOM_ORDER" && customOrderId) {
+        return await Notification.findOne({
+          type: "CUSTOM_ORDER",
+          customOrder: customOrderId,
+        });
+      }
     }
-
-    // ==========================================
-    // OTHER NOTIFICATION ERRORS
-    // ==========================================
 
     console.error(
       "Notification creation error:",

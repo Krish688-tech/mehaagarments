@@ -4,7 +4,13 @@ const notificationSchema = new mongoose.Schema(
   {
     type: {
       type: String,
-      enum: ["NEW_ORDER", "ORDER_STATUS", "PAYMENT", "SHIPPING"],
+      enum: [
+        "NEW_ORDER",
+        "ORDER_STATUS",
+        "PAYMENT",
+        "SHIPPING",
+        "CUSTOM_ORDER",
+      ],
       required: true,
     },
 
@@ -29,6 +35,12 @@ const notificationSchema = new mongoose.Schema(
     isRead: {
       type: Boolean,
       default: false,
+    },
+
+    customOrder: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "CustomOrder",
+      default: null,
     },
   },
   {
@@ -62,9 +74,18 @@ notificationSchema.index(
   },
 );
 
-const Notification = mongoose.model(
-  "Notification",
-  notificationSchema,
+notificationSchema.index(
+  { type: 1, customOrder: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      type: "CUSTOM_ORDER",
+      customOrder: { $type: "objectId" },
+    },
+    name: "unique_custom_order_notification",
+  },
 );
+
+const Notification = mongoose.model("Notification", notificationSchema);
 
 export default Notification;

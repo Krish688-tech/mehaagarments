@@ -1,12 +1,26 @@
+
 import cloudinary from "../config/cloudinary.js";
 
 export const generateUploadSignature = async (req, res) => {
   try {
-    const timestamp = Math.round(
-      new Date().getTime() / 1000
-    );
+    const timestamp = Math.round(Date.now() / 1000);
 
-    const folder = "mehaa-garments/products";
+    const allowedFolders = [
+      "mehaa-garments/products",
+      "mehaa-garments/custom-designs",
+      "mehaa-garments/reviews",
+    ];
+
+    const requestedFolder = req.query.folder || "mehaa-garments/products";
+
+    if (!allowedFolders.includes(requestedFolder)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid upload folder",
+      });
+    }
+
+    const folder = requestedFolder;
 
     const signature = cloudinary.utils.api_sign_request(
       {
@@ -16,7 +30,7 @@ export const generateUploadSignature = async (req, res) => {
       process.env.CLOUDINARY_API_SECRET
     );
 
-    res.json({
+    return res.status(200).json({
       timestamp,
       signature,
       folder,
@@ -24,12 +38,10 @@ export const generateUploadSignature = async (req, res) => {
       apiKey: process.env.CLOUDINARY_API_KEY,
     });
   } catch (error) {
-    console.error(
-      "Cloudinary signature error:",
-      error
-    );
+    console.error("Cloudinary signature error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
+      success: false,
       message: "Unable to generate upload signature",
     });
   }

@@ -9,6 +9,7 @@ export const getAdminNotifications = async (req, res) => {
   try {
     const notifications = await Notification.find()
       .populate("order", "_id orderStatus totalPrice createdAt")
+      .populate("customOrder", "_id")
       .sort({ createdAt: -1 })
       .limit(50);
 
@@ -22,10 +23,7 @@ export const getAdminNotifications = async (req, res) => {
       unreadCount,
     });
   } catch (error) {
-    console.error(
-      "Get notifications error:",
-      error.message,
-    );
+    console.error("Get notifications error:", error.message);
 
     res.status(500).json({
       success: false,
@@ -60,10 +58,7 @@ export const markNotificationAsRead = async (req, res) => {
       notification,
     });
   } catch (error) {
-    console.error(
-      "Mark notification as read error:",
-      error.message,
-    );
+    console.error("Mark notification as read error:", error.message);
 
     res.status(500).json({
       success: false,
@@ -76,10 +71,7 @@ export const markNotificationAsRead = async (req, res) => {
 // MARK ALL NOTIFICATIONS AS READ
 // ==========================================
 
-export const markAllNotificationsAsRead = async (
-  req,
-  res,
-) => {
+export const markAllNotificationsAsRead = async (req, res) => {
   try {
     await Notification.updateMany(
       { isRead: false },
@@ -91,10 +83,7 @@ export const markAllNotificationsAsRead = async (
       message: "All notifications marked as read",
     });
   } catch (error) {
-    console.error(
-      "Mark all notifications as read error:",
-      error.message,
-    );
+    console.error("Mark all notifications as read error:", error.message);
 
     res.status(500).json({
       success: false,
