@@ -33,7 +33,6 @@ export const getUserProfile = async (req, res) => {
   }
 };
 
-
 // ============================================
 // UPDATE USER PROFILE
 // PUT /api/users/profile
@@ -136,28 +135,14 @@ export const saveUserAddress = async (req, res) => {
       });
     }
 
-    const {
-      phone,
-      address,
-      apartment,
-      city,
-      state,
-      pincode,
-      country,
-    } = req.body;
+    const { phone, address, apartment, city, state, pincode, country } =
+      req.body;
 
     // ----------------------------------------
     // Required fields
     // ----------------------------------------
 
-    if (
-      !phone ||
-      !address ||
-      !city ||
-      !state ||
-      !pincode ||
-      !country
-    ) {
+    if (!phone || !address || !city || !state || !pincode || !country) {
       return res.status(400).json({
         success: false,
         message: "Please complete all required address fields",
@@ -170,9 +155,7 @@ export const saveUserAddress = async (req, res) => {
 
     const cleanPhone = String(phone).trim();
     const cleanAddress = String(address).trim();
-    const cleanApartment = apartment
-      ? String(apartment).trim()
-      : "";
+    const cleanApartment = apartment ? String(apartment).trim() : "";
     const cleanCity = String(city).trim();
     const cleanState = String(state).trim();
     const cleanPincode = String(pincode).trim();
@@ -233,7 +216,6 @@ export const saveUserAddress = async (req, res) => {
   }
 };
 
-
 // ============================================
 // CHANGE PASSWORD
 // PUT /api/users/change-password
@@ -279,17 +261,29 @@ export const changePassword = async (req, res) => {
       });
     }
 
+    // ==========================================
+    // GOOGLE ACCOUNT CHECK
+    // ==========================================
+
+    if (!user.password) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "This account does not have a password. Please use Google sign-in or set a password through the password recovery process.",
+      });
+    }
+
     // -----------------------------
     // Verify current password
     // -----------------------------
 
     const isCurrentPasswordCorrect = await bcrypt.compare(
       currentPassword,
-      user.password
+      user.password,
     );
 
     if (!isCurrentPasswordCorrect) {
-      return res.status(401).json({
+      return res.status(400).json({
         success: false,
         message: "Current password is incorrect",
       });
@@ -299,16 +293,12 @@ export const changePassword = async (req, res) => {
     // Prevent same password
     // -----------------------------
 
-    const isSamePassword = await bcrypt.compare(
-      newPassword,
-      user.password
-    );
+    const isSamePassword = await bcrypt.compare(newPassword, user.password);
 
     if (isSamePassword) {
       return res.status(400).json({
         success: false,
-        message:
-          "New password must be different from the current password",
+        message: "New password must be different from the current password",
       });
     }
 
@@ -342,28 +332,18 @@ export const changePassword = async (req, res) => {
 
 export const getAdminCustomers = async (req, res) => {
   try {
-    const page = Math.max(
-      Number.parseInt(req.query.page, 10) || 1,
-      1,
-    );
+    const page = Math.max(Number.parseInt(req.query.page, 10) || 1, 1);
 
     const limit = Math.min(
-      Math.max(
-        Number.parseInt(req.query.limit, 10) || 10,
-        1,
-      ),
+      Math.max(Number.parseInt(req.query.limit, 10) || 10, 1),
       50,
     );
 
     const search =
-      typeof req.query.search === "string"
-        ? req.query.search.trim()
-        : "";
+      typeof req.query.search === "string" ? req.query.search.trim() : "";
 
     const status =
-      typeof req.query.status === "string"
-        ? req.query.status.trim()
-        : "all";
+      typeof req.query.status === "string" ? req.query.status.trim() : "all";
 
     const filter = {
       role: "customer",
@@ -374,10 +354,7 @@ export const getAdminCustomers = async (req, res) => {
     // ==========================================
 
     if (search) {
-      const escapedSearch = search.replace(
-        /[.*+?^${}()|[\]\\]/g,
-        "\\$&",
-      );
+      const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
       filter.$or = [
         {
@@ -409,19 +386,16 @@ export const getAdminCustomers = async (req, res) => {
 
     const skip = (page - 1) * limit;
 
-    const [customers, totalCustomers] =
-      await Promise.all([
-        User.find(filter)
-          .select(
-            "_id name email role isActive address createdAt updatedAt",
-          )
-          .sort({ createdAt: -1 })
-          .skip(skip)
-          .limit(limit)
-          .lean(),
+    const [customers, totalCustomers] = await Promise.all([
+      User.find(filter)
+        .select("_id name email role isActive address createdAt updatedAt")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
 
-        User.countDocuments(filter),
-      ]);
+      User.countDocuments(filter),
+    ]);
 
     return res.status(200).json({
       success: true,
@@ -432,27 +406,17 @@ export const getAdminCustomers = async (req, res) => {
         page,
         limit,
         total: totalCustomers,
-        totalPages: Math.ceil(
-          totalCustomers / limit,
-        ),
-        hasNextPage:
-          page <
-          Math.ceil(
-            totalCustomers / limit,
-          ),
+        totalPages: Math.ceil(totalCustomers / limit),
+        hasNextPage: page < Math.ceil(totalCustomers / limit),
         hasPreviousPage: page > 1,
       },
     });
   } catch (error) {
-    console.error(
-      "GET ADMIN CUSTOMERS ERROR:",
-      error,
-    );
+    console.error("GET ADMIN CUSTOMERS ERROR:", error);
 
     return res.status(500).json({
       success: false,
-      message:
-        "Failed to fetch customers",
+      message: "Failed to fetch customers",
     });
   }
 };
@@ -463,18 +427,13 @@ export const getAdminCustomers = async (req, res) => {
 // Protected + Admin
 // ============================================
 
-export const getAdminCustomerById = async (
-  req,
-  res,
-) => {
+export const getAdminCustomerById = async (req, res) => {
   try {
     const customer = await User.findOne({
       _id: req.params.id,
       role: "customer",
     })
-      .select(
-        "_id name email role isActive address createdAt updatedAt",
-      )
+      .select("_id name email role isActive address createdAt updatedAt")
       .lean();
 
     if (!customer) {
@@ -488,38 +447,34 @@ export const getAdminCustomerById = async (
     // CUSTOMER ORDER STATISTICS
     // ==========================================
 
-    const orderStats =
-      await Order.aggregate([
-        {
-          $match: {
-            user: customer._id,
-          },
+    const orderStats = await Order.aggregate([
+      {
+        $match: {
+          user: customer._id,
         },
-        {
-          $group: {
-            _id: null,
+      },
+      {
+        $group: {
+          _id: null,
 
-            totalOrders: {
-              $sum: 1,
-            },
+          totalOrders: {
+            $sum: 1,
+          },
 
-            totalSpent: {
-              $sum: {
-                $cond: [
-                  {
-                    $eq: [
-                      "$paymentStatus",
-                      "paid",
-                    ],
-                  },
-                  "$totalPrice",
-                  0,
-                ],
-              },
+          totalSpent: {
+            $sum: {
+              $cond: [
+                {
+                  $eq: ["$paymentStatus", "paid"],
+                },
+                "$totalPrice",
+                0,
+              ],
             },
           },
         },
-      ]);
+      },
+    ]);
 
     const stats = orderStats[0] || {
       totalOrders: 0,
@@ -537,15 +492,11 @@ export const getAdminCustomerById = async (
       },
     });
   } catch (error) {
-    console.error(
-      "GET ADMIN CUSTOMER ERROR:",
-      error,
-    );
+    console.error("GET ADMIN CUSTOMER ERROR:", error);
 
     return res.status(500).json({
       success: false,
-      message:
-        "Failed to fetch customer",
+      message: "Failed to fetch customer",
     });
   }
 };
@@ -556,10 +507,7 @@ export const getAdminCustomerById = async (
 // Protected + Admin
 // ============================================
 
-export const getAdminCustomerOrders = async (
-  req,
-  res,
-) => {
+export const getAdminCustomerOrders = async (req, res) => {
   try {
     const customer = await User.findOne({
       _id: req.params.id,
@@ -578,10 +526,7 @@ export const getAdminCustomerOrders = async (
     const orders = await Order.find({
       user: customer._id,
     })
-      .populate(
-        "orderItems.productId",
-        "name image price",
-      )
+      .populate("orderItems.productId", "name image price")
       .sort({ createdAt: -1 })
       .lean();
 
@@ -593,15 +538,11 @@ export const getAdminCustomerOrders = async (
       orders,
     });
   } catch (error) {
-    console.error(
-      "GET CUSTOMER ORDERS ERROR:",
-      error,
-    );
+    console.error("GET CUSTOMER ORDERS ERROR:", error);
 
     return res.status(500).json({
       success: false,
-      message:
-        "Failed to fetch customer orders",
+      message: "Failed to fetch customer orders",
     });
   }
 };
@@ -612,61 +553,54 @@ export const getAdminCustomerOrders = async (
 // Protected + Admin
 // ============================================
 
-export const updateAdminCustomerStatus =
-  async (req, res) => {
-    try {
-      const { isActive } = req.body;
+export const updateAdminCustomerStatus = async (req, res) => {
+  try {
+    const { isActive } = req.body;
 
-      if (typeof isActive !== "boolean") {
-        return res.status(400).json({
-          success: false,
-          message:
-            "isActive must be a boolean",
-        });
-      }
-
-      const customer =
-        await User.findOne({
-          _id: req.params.id,
-          role: "customer",
-        });
-
-      if (!customer) {
-        return res.status(404).json({
-          success: false,
-          message: "Customer not found",
-        });
-      }
-
-      customer.isActive = isActive;
-
-      await customer.save();
-
-      return res.status(200).json({
-        success: true,
-
-        message: isActive
-          ? "Customer activated successfully"
-          : "Customer deactivated successfully",
-
-        customer: {
-          id: customer._id,
-          name: customer.name,
-          email: customer.email,
-          role: customer.role,
-          isActive: customer.isActive,
-        },
-      });
-    } catch (error) {
-      console.error(
-        "UPDATE CUSTOMER STATUS ERROR:",
-        error,
-      );
-
-      return res.status(500).json({
+    if (typeof isActive !== "boolean") {
+      return res.status(400).json({
         success: false,
-        message:
-          "Failed to update customer status",
+        message: "isActive must be a boolean",
       });
     }
-  };
+
+    const customer = await User.findOne({
+      _id: req.params.id,
+      role: "customer",
+    });
+
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        message: "Customer not found",
+      });
+    }
+
+    customer.isActive = isActive;
+
+    await customer.save();
+
+    return res.status(200).json({
+      success: true,
+
+      message: isActive
+        ? "Customer activated successfully"
+        : "Customer deactivated successfully",
+
+      customer: {
+        id: customer._id,
+        name: customer.name,
+        email: customer.email,
+        role: customer.role,
+        isActive: customer.isActive,
+      },
+    });
+  } catch (error) {
+    console.error("UPDATE CUSTOMER STATUS ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update customer status",
+    });
+  }
+};
