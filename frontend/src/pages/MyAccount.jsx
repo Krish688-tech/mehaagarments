@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, MapPin, Lock, LogOut } from "lucide-react";
+import { User, MapPin, Lock, LogOut, Eye, EyeOff } from "lucide-react";
 import Swal from "sweetalert2";
 import { useAuth } from "../context/AuthContext";
 
@@ -29,6 +29,21 @@ const MyAccount = () => {
 
   const [savingAddress, setSavingAddress] = useState(false);
   const [addressError, setAddressError] = useState("");
+
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false,
+  });
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -366,6 +381,95 @@ const MyAccount = () => {
       );
     } finally {
       setSavingProfile(false);
+    }
+  };
+
+  // ============================================
+  // CHANGE PASSWORD
+  // PUT /api/users/change-password
+  // ============================================
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+
+    setPasswordError("");
+
+    const { currentPassword, newPassword, confirmPassword } = passwordData;
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordError("Please complete all password fields.");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setPasswordError("New password must contain at least 8 characters.");
+      return;
+    }
+
+    if (currentPassword === newPassword) {
+      setPasswordError(
+        "Your new password must be different from your current password.",
+      );
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New password and confirmation do not match.");
+      return;
+    }
+
+    try {
+      setSavingPassword(true);
+
+      const API_URL =
+        import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+      const response = await fetch(`${API_URL}/users/change-password`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.status === 401) {
+        logout();
+        navigate("/login", { replace: true });
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to change password.");
+      }
+
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+
+      setPasswordError("");
+
+      await Swal.fire({
+        icon: "success",
+        title: "Password Changed!",
+        text: "Your account password has been updated successfully.",
+        confirmButtonColor: "#000000",
+      });
+    } catch (error) {
+      console.error("Change Password Error:", error);
+
+      setPasswordError(
+        error.message || "Unable to change your password. Please try again.",
+      );
+    } finally {
+      setSavingPassword(false);
     }
   };
 
@@ -902,47 +1006,187 @@ const MyAccount = () => {
                   </p>
                 </div>
 
-                <div className="max-w-xl space-y-6">
+                <form
+                  onSubmit={handleChangePassword}
+                  className="max-w-xl space-y-6"
+                >
+                  {/* CURRENT PASSWORD */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Current Password
                     </label>
 
-                    <input
-                      type="password"
-                      placeholder="Enter current password"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-black"
-                    />
+                    <div className="relative">
+                      <input
+                        type={showPasswords.current ? "text" : "password"}
+                        value={passwordData.currentPassword}
+                        onChange={(e) => {
+                          setPasswordData((prev) => ({
+                            ...prev,
+                            currentPassword: e.target.value,
+                          }));
+                          setPasswordError("");
+                        }}
+                        placeholder="Enter current password"
+                        autoComplete="current-password"
+                        required
+                        className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-200 outline-none focus:border-black transition"
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowPasswords((prev) => ({
+                            ...prev,
+                            current: !prev.current,
+                          }))
+                        }
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition"
+                        aria-label={
+                          showPasswords.current
+                            ? "Hide password"
+                            : "Show password"
+                        }
+                      >
+                        {showPasswords.current ? (
+                          <EyeOff size={19} />
+                        ) : (
+                          <Eye size={19} />
+                        )}
+                      </button>
+                    </div>
                   </div>
 
+                  {/* NEW PASSWORD */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       New Password
                     </label>
 
-                    <input
-                      type="password"
-                      placeholder="Enter new password"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-black"
-                    />
+                    <div className="relative">
+                      <input
+                        type={showPasswords.new ? "text" : "password"}
+                        value={passwordData.newPassword}
+                        onChange={(e) => {
+                          setPasswordData((prev) => ({
+                            ...prev,
+                            newPassword: e.target.value,
+                          }));
+                          setPasswordError("");
+                        }}
+                        placeholder="Enter new password"
+                        autoComplete="new-password"
+                        minLength={8}
+                        required
+                        className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-200 outline-none focus:border-black transition"
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowPasswords((prev) => ({
+                            ...prev,
+                            new: !prev.new,
+                          }))
+                        }
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition"
+                        aria-label={
+                          showPasswords.new ? "Hide password" : "Show password"
+                        }
+                      >
+                        {showPasswords.new ? (
+                          <EyeOff size={19} />
+                        ) : (
+                          <Eye size={19} />
+                        )}
+                      </button>
+                    </div>
                   </div>
 
+                  {/* CONFIRM PASSWORD */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Confirm New Password
                     </label>
 
-                    <input
-                      type="password"
-                      placeholder="Confirm new password"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-black"
-                    />
+                    <div className="relative">
+                      <input
+                        type={showPasswords.confirm ? "text" : "password"}
+                        value={passwordData.confirmPassword}
+                        onChange={(e) => {
+                          setPasswordData((prev) => ({
+                            ...prev,
+                            confirmPassword: e.target.value,
+                          }));
+                          setPasswordError("");
+                        }}
+                        placeholder="Confirm new password"
+                        autoComplete="new-password"
+                        minLength={8}
+                        required
+                        className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-200 outline-none focus:border-black transition"
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowPasswords((prev) => ({
+                            ...prev,
+                            confirm: !prev.confirm,
+                          }))
+                        }
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition"
+                        aria-label={
+                          showPasswords.confirm
+                            ? "Hide password"
+                            : "Show password"
+                        }
+                      >
+                        {showPasswords.confirm ? (
+                          <EyeOff size={19} />
+                        ) : (
+                          <Eye size={19} />
+                        )}
+                      </button>
+                    </div>
                   </div>
 
-                  <button className="px-7 py-3 rounded-full bg-black text-white text-sm font-medium hover:scale-105 transition">
-                    Change Password
-                  </button>
-                </div>
+                  {/* ERROR */}
+                  {passwordError && (
+                    <div className="bg-red-50 border border-red-100 text-red-600 rounded-xl px-4 py-3 text-sm">
+                      {passwordError}
+                    </div>
+                  )}
+
+                  {/* BUTTONS */}
+                  <div className="flex flex-wrap gap-3 pt-2">
+                    <button
+                      type="submit"
+                      disabled={savingPassword}
+                      className="px-7 py-3 rounded-full bg-black text-white text-sm font-medium hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    >
+                      {savingPassword
+                        ? "Updating Password..."
+                        : "Change Password"}
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={savingPassword}
+                      onClick={() => {
+                        setPasswordData({
+                          currentPassword: "",
+                          newPassword: "",
+                          confirmPassword: "",
+                        });
+                        setPasswordError("");
+                      }}
+                      className="px-7 py-3 rounded-full border border-gray-300 text-gray-800 text-sm font-medium hover:bg-gray-50 transition disabled:opacity-50"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </form>
               </div>
             )}
           </section>
