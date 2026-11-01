@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Bell, Check, ExternalLink, X } from "lucide-react";
 import { io } from "socket.io-client";
@@ -11,9 +10,7 @@ const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
 const urlBase64ToUint8Array = (base64String) => {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding)
-    .replace(/-/g, "+")
-    .replace(/_/g, "/");
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
 
   const rawData = window.atob(base64);
   const outputArray = new Uint8Array(rawData.length);
@@ -57,6 +54,8 @@ const getNotificationLabel = (type) => {
       return "Payment";
     case "SHIPPING":
       return "Shipping Update";
+    case "CUSTOM_ORDER":
+      return "Custom Saree Request";
     default:
       return "Notification";
   }
@@ -70,6 +69,8 @@ const getNotificationColor = (type) => {
       return "bg-blue-100 text-blue-700";
     case "SHIPPING":
       return "bg-purple-100 text-purple-700";
+    case "CUSTOM_ORDER":
+      return "bg-amber-100 text-amber-800";
     default:
       return "bg-gray-100 text-gray-700";
   }
@@ -144,8 +145,7 @@ const AdminNotifications = () => {
         return Array.from(combined.values())
           .sort(
             (a, b) =>
-              new Date(b.createdAt).getTime() -
-              new Date(a.createdAt).getTime()
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
           )
           .slice(0, 50);
       });
@@ -154,7 +154,7 @@ const AdminNotifications = () => {
       setUnreadCount(
         typeof data.unreadCount === "number"
           ? data.unreadCount
-          : fetchedNotifications.filter((item) => !item.isRead).length
+          : fetchedNotifications.filter((item) => !item.isRead).length,
       );
     } catch (error) {
       console.error("Failed to fetch admin notifications:", error.message);
@@ -204,9 +204,9 @@ const AdminNotifications = () => {
         [notification, ...previous]
           .filter(
             (item, index, array) =>
-              array.findIndex((entry) => entry._id === item._id) === index
+              array.findIndex((entry) => entry._id === item._id) === index,
           )
-          .slice(0, 50)
+          .slice(0, 50),
       );
 
       if (!notification.isRead) {
@@ -240,21 +240,21 @@ const AdminNotifications = () => {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || "Failed to mark notification as read.");
+          throw new Error(
+            data.message || "Failed to mark notification as read.",
+          );
         }
 
         setNotifications((previous) =>
           previous.map((item) =>
-            item._id === notification._id
-              ? { ...item, isRead: true }
-              : item
-          )
+            item._id === notification._id ? { ...item, isRead: true } : item,
+          ),
         );
 
         setUnreadCount((previous) => Math.max(previous - 1, 0));
@@ -262,7 +262,7 @@ const AdminNotifications = () => {
         console.error("Failed to mark notification as read:", error.message);
       }
     },
-    [token]
+    [token],
   );
 
   // --------------------------------------------------
@@ -273,15 +273,12 @@ const AdminNotifications = () => {
     if (!token || unreadCount === 0) return;
 
     try {
-      const response = await fetch(
-        `${API_URL}/admin/notifications/read-all`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_URL}/admin/notifications/read-all`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       const data = await response.json();
 
@@ -293,7 +290,7 @@ const AdminNotifications = () => {
         previous.map((notification) => ({
           ...notification,
           isRead: true,
-        }))
+        })),
       );
 
       setUnreadCount(0);
@@ -315,7 +312,7 @@ const AdminNotifications = () => {
 
       const matchingNotification = notifications.filter(
         (notification) =>
-          getOrderId(notification) === orderId && !notification.isRead
+          getOrderId(notification) === orderId && !notification.isRead,
       );
 
       matchingNotification.forEach((notification) => {
@@ -353,7 +350,10 @@ const AdminNotifications = () => {
           setPushEnabled(Boolean(subscription));
         }
       } catch (error) {
-        console.error("Failed to check desktop push subscription:", error.message);
+        console.error(
+          "Failed to check desktop push subscription:",
+          error.message,
+        );
       }
     };
 
@@ -391,14 +391,16 @@ const AdminNotifications = () => {
       }
 
       if (!VAPID_PUBLIC_KEY) {
-        throw new Error("VITE_VAPID_PUBLIC_KEY is missing from your frontend environment.");
+        throw new Error(
+          "VITE_VAPID_PUBLIC_KEY is missing from your frontend environment.",
+        );
       }
 
       const permission = await window.Notification.requestPermission();
 
       if (permission !== "granted") {
         throw new Error(
-          "Notifications are blocked. Allow notifications for this website in your browser settings."
+          "Notifications are blocked. Allow notifications for this website in your browser settings.",
         );
       }
 
@@ -423,13 +425,15 @@ const AdminNotifications = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(subscription.toJSON()),
-        }
+        },
       );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to save your push subscription.");
+        throw new Error(
+          data.message || "Failed to save your push subscription.",
+        );
       }
 
       setPushEnabled(true);
@@ -471,13 +475,24 @@ const AdminNotifications = () => {
     await markAsRead(notification);
     setIsOpen(false);
 
+    const customOrderId = getCustomOrderId(notification);
     const orderId = getOrderId(notification);
 
-    if (orderId) {
+    if (customOrderId) {
+      navigate(`/admin/custom-orders/${customOrderId}`);
+    } else if (orderId) {
       navigate(`/admin/orders/${orderId}`);
     } else {
       navigate("/admin/orders");
     }
+  };
+
+  const getCustomOrderId = (notification) => {
+    const customOrder = notification?.customOrder;
+
+    if (typeof customOrder === "string") return customOrder;
+
+    return customOrder?._id || null;
   };
 
   // --------------------------------------------------
@@ -511,7 +526,8 @@ const AdminNotifications = () => {
                   Notifications
                 </h3>
                 <p className="mt-1 text-xs text-gray-500">
-                  {unreadCount} unread notification{unreadCount === 1 ? "" : "s"}
+                  {unreadCount} unread notification
+                  {unreadCount === 1 ? "" : "s"}
                 </p>
               </div>
 
@@ -596,7 +612,7 @@ const AdminNotifications = () => {
                   >
                     <span
                       className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${getNotificationColor(
-                        notification.type
+                        notification.type,
                       )}`}
                     >
                       <Bell size={17} />
@@ -605,7 +621,8 @@ const AdminNotifications = () => {
                     <span className="min-w-0 flex-1">
                       <span className="flex items-start justify-between gap-2">
                         <span className="text-sm font-semibold text-gray-900">
-                          {notification.title || getNotificationLabel(notification.type)}
+                          {notification.title ||
+                            getNotificationLabel(notification.type)}
                         </span>
 
                         {!notification.isRead && (

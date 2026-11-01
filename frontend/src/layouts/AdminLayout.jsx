@@ -56,6 +56,10 @@ const AdminLayout = () => {
                 Orders
               </NavLink>
 
+              <NavLink to="/admin/custom-orders" className={navLinkClass}>
+                Custom Orders
+              </NavLink>
+
               <NavLink to="/admin/customers" className={navLinkClass}>
                 Customers
               </NavLink>

@@ -6,5 +6,33 @@
  font-family: 'Playfair Display', serif;
 }
 
+/* MEHAA CUSTOM ORDER SUCCESS POPUP */
 
+.mehaa-custom-popup {
+  border: 1px solid #e0d6c9 !important;
+  border-radius: 4px !important;
+  box-shadow: 0 20px 70px rgba(48, 38, 31, 0.12) !important;
+}
+
+.mehaa-popup-title {
+  font-family: Georgia, serif !important;
+  font-size: 27px !important;
+  font-weight: 400 !important;
+  color: #30261f !important;
+  letter-spacing: -0.5px !important;
+}
+
+.mehaa-popup-button {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 1.5px !important;
+  text-transform: uppercase !important;
+  padding: 14px 32px !important;
+  border-radius: 0 !important;
+  transition: all 0.3s ease !important;
+}
+
+.mehaa-popup-button:hover {
+  background: #8b7355 !important;
+}
 

@@ -44,6 +44,9 @@ import AdminUniqueCategories from "./pages/AdminUniqueCategories";
 import AdminReviews from "./pages/AdminReviews";
 import AdminInvoice from "./pages/AdminInvoice";
 
+import AdminCustomOrders from "./pages/admin/AdminCustomOrders";
+import AdminCustomOrderDetails from "./pages/admin/AdminCustomOrderDetails";
+
 function App() {
   return (
     <>
@@ -111,6 +114,11 @@ function App() {
             <Route path="/admin/reviews" element={<AdminReviews />} />
             <Route path="/admin/newsletter" element={<AdminNewsletter />} />
             <Route path="/admin/invoices/:id" element={<AdminInvoice />} />
+            <Route path="/admin/custom-orders" element={<AdminCustomOrders />} />
+            <Route
+              path="/admin/custom-orders/:id"
+              element={<AdminCustomOrderDetails />}
+            />
           </Route>
         </Route>
       </Routes>
